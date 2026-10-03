@@ -229,6 +229,14 @@ S3/SQS clients receive the endpoint explicitly from `AWS_ENDPOINT_URL` with path
 4. LiveKit container reaching `host.docker.internal:3000` for webhooks.
 5. LiveKit Agents session events for building the transcript (event names, timestamps).
 
+**Results (2026-10-03):**
+
+- (2) ✅ One `createRoom` with `agents` + `egress` dispatches the agent and starts recording; calling it again returns the same room without a second dispatch.
+- (3) ✅ Audio-only room-composite Egress uploaded a 240 KB MP4 to moto; the presigned GET serves it. Requires LiveKit's `node_ip` to be the Mac's LAN address so the Egress container can reach the media port.
+- (4) ✅ Signed webhooks reach `host.docker.internal:3000`; a real browser call moved a meeting `upcoming → active → processing` and set `recordingKey`.
+- (5) ✅ livekit-agents 1.8.4: `AgentServer` + `@server.rtc_session(agent_name=…, on_session_end=…)`; `conversation_item_added` with `metrics.started_speaking_at/stopped_speaking_at`; turn detection must be set to `"vad"` explicitly or the defaults call LiveKit Cloud; `on_session_end` has a 300 s budget for the S3/SQS hand-off.
+- Post-call pipeline ✅ live: S3 → SQS → worker → `qwen3.5:4b` → Postgres in 18 s.
+
 ## 12. Sub-project 1 — Core app (detailed)
 
 ### 12.1 Scope
