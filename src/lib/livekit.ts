@@ -44,7 +44,8 @@ function recordingEgress(meetingId: string) {
             value: new S3Upload({
               bucket: env.S3_BUCKET,
               region: env.AWS_REGION,
-              // Local emulator only; in AWS, Egress uses its own IAM role.
+              // Local emulator only. In AWS the keys are empty and Egress is expected to
+              // fall back to the EC2 instance role (unverified until the first deploy).
               endpoint: env.EGRESS_S3_ENDPOINT ?? "",
               forcePathStyle: Boolean(env.EGRESS_S3_ENDPOINT),
               accessKey: env.AWS_ACCESS_KEY_ID ?? "",

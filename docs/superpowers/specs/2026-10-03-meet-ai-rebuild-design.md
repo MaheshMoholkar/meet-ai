@@ -185,7 +185,7 @@ Postgres 17, Drizzle, versioned migrations (`drizzle-kit generate` + `migrate`; 
 | `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL` | web | 1 |
 | `GITHUB_CLIENT_ID/SECRET`, `GOOGLE_CLIENT_ID/SECRET` | web (optional; providers hidden when unset) | 1 |
 | `NEXT_PUBLIC_APP_URL` | web | 1 |
-| `LIVEKIT_URL`, `NEXT_PUBLIC_LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | web, agent | 2 |
+| `LIVEKIT_URL` (server API, may be private), `LIVEKIT_PUBLIC_URL` (browser WebSocket; runtime, not a `NEXT_PUBLIC_` build-time value), `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET` | web, agent | 2 |
 | `DAILY_BUDGET_MIN` | web | 2 |
 | `STT_PROVIDER`, `STT_BASE_URL`, `STT_MODEL`, `TTS_PROVIDER`, `TTS_BASE_URL`, `TTS_MODEL`, `TTS_VOICE` | agent | 2 |
 | `AGENT_PROVIDER_TIMEOUT_SEC` (default 30; cold local models exceed LiveKit's 10 s default) | agent | 2 |

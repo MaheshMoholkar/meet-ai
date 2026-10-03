@@ -8,7 +8,7 @@ const valid = {
   BETTER_AUTH_URL: "http://localhost:3000",
   NEXT_PUBLIC_APP_URL: "http://localhost:3000",
   LIVEKIT_URL: "http://localhost:7880",
-  NEXT_PUBLIC_LIVEKIT_URL: "ws://localhost:7880",
+  LIVEKIT_PUBLIC_URL: "ws://localhost:7880",
   LIVEKIT_API_KEY: "devkey",
   LIVEKIT_API_SECRET: "y".repeat(32),
   S3_BUCKET: "meetai",

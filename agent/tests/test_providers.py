@@ -32,6 +32,25 @@ def test_prod_providers_are_aws():
     assert isinstance(build_llm(settings), aws.LLM)
 
 
+def test_mumbai_voice_settings_build():
+    settings = from_env(
+        BASE
+        | {
+            "STT_PROVIDER": "aws",
+            "TTS_PROVIDER": "aws",
+            "STT_LANGUAGE": "en-IN",
+            "TTS_VOICE": "Kajal",
+            "TTS_LANGUAGE": "en-IN",
+            "AWS_REGION": "ap-south-1",
+        }
+    )
+    assert isinstance(build_tts(settings), aws.TTS)
+    assert isinstance(build_stt(settings), aws.STT)
+    # Whisper (dev) gets the bare language code from the same setting.
+    dev = from_env(BASE | {"STT_LANGUAGE": "en-IN"})
+    assert isinstance(build_stt(dev), openai.STT)
+
+
 def test_instructions_carry_name_voice_rules_and_user_instructions():
     meta = parse_metadata(
         json.dumps(

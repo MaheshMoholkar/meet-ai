@@ -71,7 +71,7 @@ describe("meetings.join", () => {
 
     const result = await callerFor(alice).meetings.join({ id: meeting.id });
 
-    expect(result).toEqual({ token: "jwt-token", serverUrl: process.env.NEXT_PUBLIC_LIVEKIT_URL });
+    expect(result).toEqual({ token: "jwt-token", serverUrl: process.env.LIVEKIT_PUBLIC_URL });
     expect(livekit.createMeetingRoom).toHaveBeenCalledWith({
       meetingId: meeting.id,
       agentName: "Coach",

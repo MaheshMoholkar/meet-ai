@@ -23,8 +23,9 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: optional,
 
   // Calls (sub-project 2)
+  // Server-side API address (may be private), and the WebSocket URL browsers use.
   LIVEKIT_URL: z.url(),
-  NEXT_PUBLIC_LIVEKIT_URL: z.url(),
+  LIVEKIT_PUBLIC_URL: z.url(),
   LIVEKIT_API_KEY: z.string().min(1),
   LIVEKIT_API_SECRET: z.string().min(32, "must be at least 32 characters"),
   LIVEKIT_AGENT_NAME: z.string().min(1).default("meet-agent"),
@@ -81,4 +82,7 @@ export function enabledSocialProviders(config: Env): SocialProvider[] {
   return providers;
 }
 
-export const env = parseEnv(process.env);
+// `next build` imports server modules while building the Docker image, where the
+// real configuration doesn't exist yet. Validation still runs at server start.
+export const env =
+  process.env.SKIP_ENV_VALIDATION === "1" ? (process.env as unknown as Env) : parseEnv(process.env);

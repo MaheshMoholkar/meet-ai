@@ -46,6 +46,9 @@ class Settings:
     tts_base_url: str | None
     tts_model: str
     tts_voice: str
+    tts_engine: str
+    tts_language: str | None
+    stt_language: str | None
     llm_provider: Provider
     llm_base_url: str | None
     llm_api_key: str
@@ -117,6 +120,10 @@ def from_env(env: dict[str, str] | None = None) -> Settings:
         tts_base_url=required("TTS_BASE_URL") if tts_provider == "openai_compatible" else None,
         tts_model=optional("TTS_MODEL", "") or "",
         tts_voice=optional("TTS_VOICE", "") or "",
+        # Polly: "neural" works in every region; "generative" isn't offered in ap-south-1.
+        tts_engine=optional("TTS_ENGINE", "neural") or "neural",
+        tts_language=optional("TTS_LANGUAGE"),
+        stt_language=optional("STT_LANGUAGE"),
         llm_provider=llm_provider,
         llm_base_url=required("LLM_BASE_URL") if llm_provider == "openai_compatible" else None,
         llm_api_key=optional("LLM_API_KEY", "ollama") or "ollama",

@@ -60,3 +60,15 @@ def test_provider_timeout_defaults_to_30_and_is_validated():
     assert from_env(BASE | {"AGENT_PROVIDER_TIMEOUT_SEC": "12.5"}).provider_timeout_sec == 12.5
     with pytest.raises(ConfigError, match="AGENT_PROVIDER_TIMEOUT_SEC"):
         from_env(BASE | {"AGENT_PROVIDER_TIMEOUT_SEC": "0"})
+
+
+def test_speech_language_and_engine_settings():
+    settings = from_env(BASE)
+    assert (settings.tts_engine, settings.tts_language, settings.stt_language) == ("neural", None, None)
+
+    settings = from_env(BASE | {"TTS_ENGINE": "generative", "TTS_LANGUAGE": "en-IN", "STT_LANGUAGE": "en-IN"})
+    assert (settings.tts_engine, settings.tts_language, settings.stt_language) == (
+        "generative",
+        "en-IN",
+        "en-IN",
+    )

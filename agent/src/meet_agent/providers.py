@@ -18,12 +18,13 @@ _UNUSED_KEY = "unused"
 
 def build_stt(settings: Settings) -> Any:
     if settings.stt_provider == "aws":
-        return aws.STT(language="en-US", region=settings.aws_region)
+        return aws.STT(language=settings.stt_language or "en-US", region=settings.aws_region)
     return openai.STT(
         model=settings.stt_model,
         base_url=settings.stt_base_url,
         api_key=_UNUSED_KEY,
-        language="en",
+        # Whisper wants a bare language code ("en"), Transcribe a locale ("en-IN").
+        language=(settings.stt_language or "en").split("-")[0],
     )
 
 
@@ -43,10 +44,14 @@ def build_llm(settings: Settings) -> Any:
 
 def build_tts(settings: Settings) -> Any:
     if settings.tts_provider == "aws":
+        options: dict[str, Any] = {}
+        if settings.tts_language:
+            options["language"] = settings.tts_language
         return aws.TTS(
-            voice=settings.tts_voice or "Ruth",
-            speech_engine="generative",
+            voice=settings.tts_voice or "Kajal",
+            speech_engine=settings.tts_engine,
             region=settings.aws_region,
+            **options,
         )
     return openai.TTS(
         model=settings.tts_model,

@@ -1,0 +1,35 @@
+# Next.js app (standalone server). Built for linux/arm64 (Graviton Fargate).
+FROM node:24-slim AS base
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH NEXT_TELEMETRY_DISABLED=1
+RUN corepack enable
+
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+
+FROM base AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# Only the server-side SSR branch of the tRPC client reads this, but Next inlines it at build time.
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
+# Placeholders only for this step (modules are imported at build time); the real
+# values come from the ECS task at runtime and are validated at server start.
+RUN SKIP_ENV_VALIDATION=1 \
+    BETTER_AUTH_SECRET=build-time-placeholder-not-used-at-runtime \
+    LIVEKIT_URL=http://livekit.invalid LIVEKIT_API_KEY=build LIVEKIT_API_SECRET=build-time-placeholder-not-used \
+    pnpm build
+
+FROM node:24-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+# RDS certificate authority, for DATABASE_URL=...?sslmode=verify-full&sslrootcert=/app/certs/rds-ca.pem
+ADD --chown=node:node --chmod=644 https://truststore.pki.rds.amazonaws.com/ap-south-1/ap-south-1-bundle.pem /app/certs/rds-ca.pem
+USER node
+EXPOSE 3000
+CMD ["node", "server.js"]

@@ -17,7 +17,8 @@
     "db:studio": "drizzle-kit studio",
     "aws:init": "tsx scripts/aws-init.ts",
     "worker": "tsx watch src/worker/index.ts",
-    "worker:start": "tsx src/worker/index.ts"
+    "worker:start": "tsx src/worker/index.ts",
+    "build:worker": "esbuild src/worker/index.ts scripts/migrate.ts --bundle --platform=node --target=node24 --format=esm --outdir=dist --entry-names=[name] --out-extension:.js=.mjs --external:pg-native --banner:js=\"import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);\""
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^5.0.105",
@@ -72,6 +73,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.11",
+    "esbuild": "0.28.0",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tailwindcss": "^4",

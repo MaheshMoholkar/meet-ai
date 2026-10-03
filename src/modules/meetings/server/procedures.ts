@@ -230,7 +230,7 @@ export const meetingsRouter = createTRPCRouter({
     }
 
     const token = await createParticipantToken({ identity: user.id, name: user.name, room: meeting.id });
-    return { token, serverUrl: env.NEXT_PUBLIC_LIVEKIT_URL };
+    return { token, serverUrl: env.LIVEKIT_PUBLIC_URL };
   }),
 
   remove: protectedProcedure.input(z.object({ id: z.uuid() })).mutation(async ({ ctx, input }) => {
