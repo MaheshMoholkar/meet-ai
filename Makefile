@@ -16,7 +16,7 @@ WEB     := pnpm --dir apps/web
 	speech warmup agent test agent-test e2e check
 
 help: ## Show this help
-	@grep -hE '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -hE '^[a-z0-9-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
 
 setup: ## Install dependencies for all apps
 	$(WEB) install
