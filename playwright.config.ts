@@ -1,0 +1,29 @@
+import { defineConfig, devices } from "@playwright/test";
+
+const PORT = 3100;
+const baseURL = `http://localhost:${PORT}`;
+
+export default defineConfig({
+  testDir: "./e2e",
+  fullyParallel: false,
+  retries: process.env.CI ? 1 : 0,
+  reporter: [["list"]],
+  use: {
+    baseURL,
+    trace: "retain-on-failure",
+  },
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  webServer: {
+    command: `pnpm exec next dev --port ${PORT}`,
+    url: `${baseURL}/sign-in`,
+    timeout: 180_000,
+    reuseExistingServer: !process.env.CI,
+    // Process env wins over .env, so E2E runs against the test database.
+    env: {
+      DATABASE_URL:
+        process.env.TEST_DATABASE_URL ?? "postgres://meetai:meetai@localhost:5432/meetai_test",
+      BETTER_AUTH_URL: baseURL,
+      NEXT_PUBLIC_APP_URL: baseURL,
+    },
+  },
+});
