@@ -11,7 +11,7 @@ A rebuild of CodeWithAntonio's Meet AI with the SaaS dependencies replaced by se
 | 1 | Core app — auth, agents, meetings, dashboard | ✅ done |
 | 2 | Call stack — LiveKit, Python voice agent, webhooks, daily budget | ✅ done |
 | 3 | Post-call pipeline — transcript, summary, recording, Ask AI | ✅ done |
-| 4 | AWS deployment | planned |
+| 4 | AWS deployment — OpenTofu + GitHub Actions ([infra/README.md](infra/README.md)) | ✅ code done, not yet applied to a real account |
 
 ## Stack
 
@@ -90,6 +90,10 @@ src/proxy.ts             optimistic auth redirect (Next 16's middleware)
 drizzle/                 versioned SQL migrations
 tests/                   integration tests and helpers
 e2e/                     Playwright tests
+agent/                   Python voice agent (LiveKit Agents)
+speech/                  local Whisper + Kokoro server for dev
+infra/                   OpenTofu for AWS (ap-south-1)
+.github/workflows/       CI and deploy
 ref/                     the original app, for study only (gitignored)
 ```
 

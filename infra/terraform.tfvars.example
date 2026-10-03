@@ -1,0 +1,17 @@
+# Copy to terraform.tfvars (gitignored) and adjust.
+app_domain = "meetai.example.com"
+rtc_domain = "rtc.meetai.example.com"
+
+# Route 53 hosted zone for the domain, if it's there; otherwise create the
+# records from the `dns_records_to_create` output by hand.
+# route53_zone_id = "Z0123456789ABCDEFGHIJ"
+
+# Enables the GitHub Actions deploy role (OIDC).
+# github_repository = "your-github-user/meet-ai"
+
+# Optional social sign-in.
+# github_oauth = { client_id = "...", client_secret = "..." }
+# google_oauth = { client_id = "...", client_secret = "..." }
+
+# Before `tofu destroy`: set to false and apply once.
+# db_deletion_protection = false

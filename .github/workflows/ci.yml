@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web (typecheck, lint, tests, build)
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: meetai
+          POSTGRES_PASSWORD: meetai
+          POSTGRES_DB: meetai
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U meetai -d meetai"
+          --health-interval 2s --health-timeout 3s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Test database and .env
+        env:
+          PGPASSWORD: meetai
+        run: |
+          psql -h localhost -U meetai -d meetai -c "CREATE DATABASE meetai_test"
+          cp .env.example .env
+          sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=\"$(openssl rand -base64 32)\"|" .env
+          sed -i "s|^LIVEKIT_API_SECRET=.*|LIVEKIT_API_SECRET=\"$(openssl rand -hex 24)\"|" .env
+
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm build:worker
+
+  agent:
+    name: Agent (pytest, ruff)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: agent
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen
+      - run: uv run pytest
+      - run: uv run ruff check src tests
+
+  infra:
+    name: Infra (fmt, validate)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - run: tofu fmt -check -recursive
+      - run: tofu init -backend=false -input=false
+      - run: tofu validate

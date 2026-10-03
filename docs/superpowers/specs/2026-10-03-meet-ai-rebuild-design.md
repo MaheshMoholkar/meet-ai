@@ -328,3 +328,18 @@ Every data page uses the pattern from `STUDY.md` §5: server `prefetchQuery` (no
 - All unit, integration and E2E tests pass.
 - `pnpm build` and `pnpm lint` succeed.
 - The repo contains no secrets; `.env.example` lists every sub-project 1 variable.
+
+## 13. Sub-project 4 — AWS deployment (as built)
+
+Code in `infra/` (OpenTofu) and `.github/workflows/`; operating guide in `infra/README.md`. Not yet applied to a real account.
+
+- **Region ap-south-1 (Mumbai)** for voice latency from India. Consequences: Polly is neural-only there (the agent's `TTS_ENGINE` defaults to `neural`, voice `Kajal`, `en-IN`); Bedrock Nova is reached through the `apac.amazon.nova-lite-v1:0` cross-region inference profile, so IAM grants the profile in-region plus `amazon.nova-*` foundation models in every region.
+- **Everything arm64 (Graviton)**, including Fargate Spot (supported since 2024): images build natively on Apple Silicon and on GitHub's arm64 runners.
+- **Compute:** ECS Fargate for web (on-demand, behind an ALB with an ACM certificate), worker and agent (Spot by default; SQS redelivers interrupted work, an interrupted call ends). One `t4g.medium` EC2 instance with an Elastic IP runs LiveKit, Egress, Redis and Caddy (Let's Encrypt for `wss://`) under Docker Compose with host networking.
+- **No NAT gateway:** tasks run in public subnets with public IPs and inbound locked by security groups; RDS sits in private subnets with no route out.
+- **Data:** RDS Postgres 17 single-AZ with TLS verified against the RDS CA bundle baked into the images (`sslmode=verify-full`); S3 with a 30-day expiry; SQS with a DLQ after 3 receives.
+- **Secrets:** SSM Parameter Store SecureStrings injected through ECS `secrets`; the media server reads the LiveKit secret from SSM at boot rather than from user data.
+- **Images:** `Dockerfile.web` (Next standalone, `/api/health` for the ALB), `Dockerfile.worker` (esbuild bundles of the worker and a migration runner), `agent/Dockerfile`. `next build` runs with `SKIP_ENV_VALIDATION=1` and build-only placeholders; validation happens at server start.
+- **Deploys:** GitHub Actions with OIDC (no stored AWS keys): build and push to ECR (`:latest` + `:<sha>`), run migrations as a one-off task, force a new deployment, wait for stability.
+- **Cost:** ≈ $105/month of infrastructure plus ≤ $30 of AI usage at the 30-minute daily budget — slightly over the $100 target; levers are in `infra/README.md`.
+- **Verification so far:** `tofu validate`; `tofu plan` and `tofu apply` against the moto emulator; all three images built and smoke-tested against the local stack. Real-AWS behaviour still to confirm is listed in `infra/README.md` § "Unverified until the first real deploy".

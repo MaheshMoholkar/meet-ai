@@ -1,0 +1,57 @@
+#!/bin/bash
+# Media server bootstrap (Amazon Linux 2023, arm64): Docker, Compose, then
+# LiveKit + Egress + Redis + Caddy as a systemd-managed Compose project.
+set -euxo pipefail
+
+dnf install -y docker
+systemctl enable --now docker
+
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-aarch64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# Larger UDP buffers for WebRTC (LiveKit warns below ~5 MB).
+cat > /etc/sysctl.d/90-livekit.conf <<'SYSCTL'
+net.core.rmem_max=5000000
+net.core.wmem_max=5000000
+SYSCTL
+sysctl --system
+
+mkdir -p /opt/meetai
+cd /opt/meetai
+
+# The LiveKit secret never appears in user data: read it from SSM with the instance role.
+secret="$(aws ssm get-parameter --region ${region} --name '${livekit_secret_param}' \
+  --with-decryption --query Parameter.Value --output text)"
+umask 077
+printf 'LIVEKIT_API_SECRET=%s\n' "$secret" > .env
+umask 022
+
+cat > docker-compose.yml <<'COMPOSE'
+${compose}
+COMPOSE
+
+cat > Caddyfile <<'CADDY'
+${caddyfile}
+CADDY
+
+cat > /etc/systemd/system/meetai-media.service <<'UNIT'
+[Unit]
+Description=Meet AI media stack (LiveKit, Egress, Redis, Caddy)
+Requires=docker.service
+After=docker.service network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/opt/meetai
+ExecStart=/usr/bin/docker compose up -d --pull missing
+ExecStop=/usr/bin/docker compose down
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now meetai-media.service

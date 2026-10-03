@@ -1,0 +1,5 @@
+# TLS for LiveKit signaling: browsers connect to wss://${rtc_domain}.
+# The certificate is issued once the DNS A record points at the Elastic IP.
+${rtc_domain} {
+	reverse_proxy localhost:7880
+}
