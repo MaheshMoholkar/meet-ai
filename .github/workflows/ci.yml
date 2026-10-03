@@ -13,6 +13,9 @@ jobs:
   web:
     name: Web (typecheck, lint, tests, build)
     runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: apps/web
     services:
       postgres:
         image: postgres:17-alpine
@@ -27,20 +30,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
+        with:
+          package_json_file: apps/web/package.json
       - uses: actions/setup-node@v4
         with:
           node-version: 24
           cache: pnpm
+          cache-dependency-path: apps/web/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
 
-      - name: Test database and .env
+      - name: Test database and the shared .env
         env:
           PGPASSWORD: meetai
         run: |
           psql -h localhost -U meetai -d meetai -c "CREATE DATABASE meetai_test"
-          cp .env.example .env
-          sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=\"$(openssl rand -base64 32)\"|" .env
-          sed -i "s|^LIVEKIT_API_SECRET=.*|LIVEKIT_API_SECRET=\"$(openssl rand -hex 24)\"|" .env
+          cp ../../.env.example ../../.env
+          sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=\"$(openssl rand -base64 32)\"|" ../../.env
+          sed -i "s|^LIVEKIT_API_SECRET=.*|LIVEKIT_API_SECRET=\"$(openssl rand -hex 24)\"|" ../../.env
 
       - run: pnpm typecheck
       - run: pnpm lint
@@ -53,7 +59,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: agent
+        working-directory: apps/agent
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
@@ -66,7 +72,7 @@ jobs:
     runs-on: ubuntu-24.04
     defaults:
       run:
-        working-directory: infra
+        working-directory: infra/aws
     steps:
       - uses: actions/checkout@v4
       - uses: opentofu/setup-opentofu@v1

@@ -1,7 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.*
 .yarn/*
@@ -11,15 +11,15 @@
 !.yarn/versions
 
 # testing
-/coverage
+coverage/
 
 # next.js
-/.next/
-/.next-e2e/
-/out/
+.next/
+.next-e2e/
+out/
 
 # production
-/build
+build/
 
 # misc
 .DS_Store
@@ -42,16 +42,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# reference app (study only)
-/ref/
-
 # playwright
-/test-results/
-/playwright-report/
+test-results/
+playwright-report/
 
 # python
 __pycache__/
 .venv/
 
 # worker bundle
-/dist/
+dist/
+
+# mlx-audio server output
+apps/speech/logs/

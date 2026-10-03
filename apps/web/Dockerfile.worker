@@ -1,0 +1,22 @@
+# Summarizer worker + migration runner: two esbuild bundles, no node_modules needed.
+# Build context: apps/web.
+FROM node:24-slim AS build
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH
+RUN corepack enable
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+COPY tsconfig.json ./
+COPY src ./src
+COPY scripts ./scripts
+RUN pnpm build:worker
+
+FROM node:24-slim
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=build --chown=node:node /app/dist ./dist
+COPY --chown=node:node drizzle ./drizzle
+ADD --chown=node:node --chmod=644 https://truststore.pki.rds.amazonaws.com/ap-south-1/ap-south-1-bundle.pem /app/certs/rds-ca.pem
+USER node
+# Migrations run as a one-off task with: node dist/migrate.mjs
+CMD ["node", "dist/index.mjs"]

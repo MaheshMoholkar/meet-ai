@@ -1,6 +1,6 @@
 name: Deploy
 
-# Manual until AWS is set up (infra/README.md). Then add:
+# Manual until AWS is set up (infra/aws/README.md). Then add:
 #   push:
 #     branches: [main]
 on:
@@ -35,8 +35,8 @@ jobs:
       - name: Build and push web
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: Dockerfile.web
+          context: apps/web
+          file: apps/web/Dockerfile
           push: true
           build-args: NEXT_PUBLIC_APP_URL=${{ vars.APP_URL }}
           tags: |
@@ -48,8 +48,8 @@ jobs:
       - name: Build and push worker
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: Dockerfile.worker
+          context: apps/web
+          file: apps/web/Dockerfile.worker
           push: true
           tags: |
             ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_PREFIX }}/worker:latest
@@ -60,7 +60,7 @@ jobs:
       - name: Build and push agent
         uses: docker/build-push-action@v6
         with:
-          context: agent
+          context: apps/agent
           push: true
           tags: |
             ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_PREFIX }}/agent:latest
