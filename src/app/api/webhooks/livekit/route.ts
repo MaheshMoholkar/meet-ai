@@ -14,6 +14,10 @@ export async function POST(request: Request) {
     return Response.json({ error: "Invalid signature" }, { status: 401 });
   }
 
+  console.info(
+    `[livekit] ${event.event} room=${event.room?.name ?? event.egressInfo?.roomName ?? "-"}` +
+      (event.participant ? ` participant=${event.participant.identity} kind=${event.participant.kind}` : ""),
+  );
   await handleLiveKitEvent(event);
   return Response.json({ ok: true });
 }

@@ -4,8 +4,9 @@ import { z } from "zod";
 import { recordingKeyFor } from "../recording";
 import { markActive, markProcessing, setRecordingKey } from "./lifecycle";
 
-// ParticipantInfo.Kind.AGENT in LiveKit's protocol.
-const AGENT_PARTICIPANT_KIND = 4;
+// ParticipantInfo.Kind.STANDARD in LiveKit's protocol: a person. The agent (4)
+// and the Egress recorder (2) join the room too and must not start the meeting.
+const STANDARD_PARTICIPANT_KIND = 0;
 
 // Rooms are named after meeting ids; anything else isn't ours.
 const meetingId = z.uuid();
@@ -15,7 +16,7 @@ export async function handleLiveKitEvent(event: WebhookEvent) {
   switch (event.event) {
     case "participant_joined": {
       const room = meetingId.safeParse(event.room?.name);
-      if (room.success && event.participant && event.participant.kind !== AGENT_PARTICIPANT_KIND) {
+      if (room.success && event.participant?.kind === STANDARD_PARTICIPANT_KIND) {
         await markActive(room.data);
       }
       return;

@@ -133,15 +133,16 @@ describe("meetings.join", () => {
 describe("LiveKit webhook events", () => {
   // Same parsing path as WebhookReceiver.receive (the constructor drops the event name).
   const event = (json: object) => WebhookEvent.fromJson(json as Parameters<typeof WebhookEvent.fromJson>[0]);
-  const participantJoined = (room: string, kind: "STANDARD" | "AGENT") =>
+  const participantJoined = (room: string, kind: "STANDARD" | "AGENT" | "EGRESS") =>
     event({ event: "participant_joined", room: { name: room }, participant: { identity: "x", kind } });
 
-  it("moves a meeting through active and processing, ignoring repeats and agents", async () => {
+  it("moves a meeting through active and processing, ignoring repeats, the agent and the recorder", async () => {
     const alice = await createUser();
     const meeting = await insertMeeting(alice.id, (await insertAgent(alice.id)).id);
     const api = callerFor(alice);
 
     await handleLiveKitEvent(participantJoined(meeting.id, "AGENT")); // the agent
+    await handleLiveKitEvent(participantJoined(meeting.id, "EGRESS")); // the recorder
     expect((await api.meetings.getOne({ id: meeting.id })).status).toBe("upcoming");
 
     await handleLiveKitEvent(participantJoined(meeting.id, "STANDARD")); // the human
