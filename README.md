@@ -9,23 +9,49 @@ A rebuild of CodeWithAntonio's Meet AI with the SaaS dependencies replaced by se
 | # | Sub-project | State |
 |---|---|---|
 | 1 | Core app — auth, agents, meetings, dashboard | ✅ done |
-| 2 | Call stack — LiveKit, Python voice agent, webhooks, daily budget | planned |
-| 3 | Post-call pipeline — transcript, summary, recording, Ask AI | planned |
+| 2 | Call stack — LiveKit, Python voice agent, webhooks, daily budget | 🚧 web side done, agent in progress |
+| 3 | Post-call pipeline — transcript, summary, recording, Ask AI | ✅ done |
 | 4 | AWS deployment | planned |
 
 ## Stack
 
 Next.js 16 (App Router, Turbopack) · React 19 · TypeScript · Tailwind v4 · shadcn/ui · tRPC v11 + TanStack Query · Drizzle ORM + Postgres 17 · Better Auth · zod · nuqs · Vitest · Playwright
 
+Calls: self-hosted LiveKit (server + Egress) · LiveKit Agents (Python) · Vercel AI SDK · S3 + SQS (moto locally)
+
+## How it fits together
+
+```
+Browser ──▶ Next.js (pages, tRPC, Better Auth, /api/webhooks/livekit, Ask AI) ──▶ Postgres
+   │ WebRTC                     ▲ webhooks
+   ▼                            │
+LiveKit server ─────────────────┘──▶ Egress ──▶ S3 recordings/{id}.mp4
+   │ dispatch
+   ▼
+Voice agent (Python): STT → LLM → TTS ──▶ S3 transcripts/{id}.jsonl + SQS message
+                                                   │
+                                     Summarizer worker (TS) ──▶ LLM ──▶ Postgres
+```
+
+| Piece | Local dev | Prod (AWS) |
+|---|---|---|
+| Postgres, Redis, LiveKit, Egress | Docker Compose | RDS, ElastiCache/EC2 |
+| S3 + SQS | moto in Docker | S3 + SQS |
+| LLM | Ollama (homelab or local) | Bedrock |
+| Speech-to-text / text-to-speech | local Whisper + Kokoro | Transcribe / Polly |
+
 ## Getting started
 
 Requirements: Node 24, pnpm 11, Docker Desktop.
 
 ```bash
-cp .env.example .env               # then set BETTER_AUTH_SECRET: openssl rand -base64 32
+cp .env.example .env               # then set BETTER_AUTH_SECRET and LIVEKIT_API_SECRET
 pnpm install
-make dev                           # Postgres in Docker, migrations, then next dev
+make dev                           # infrastructure in Docker, migrations, then next dev
+pnpm worker                        # summarizer worker (second terminal)
 ```
+
+Calls also need the voice agent and speech models running (see `agent/`), and an Ollama endpoint in `LLM_BASE_URL`.
 
 Open http://localhost:3000 and sign up with any email and password. GitHub and Google sign-in appear once their client id and secret are set in `.env`.
 
@@ -35,7 +61,8 @@ The Makefile pins Docker to the local `desktop-linux` context, so a globally sel
 
 | Command | What it does |
 |---|---|
-| `make up` / `make down` | Start / stop Postgres (data is kept) |
+| `make up` / `make down` | Start / stop infrastructure and create the S3 bucket and SQS queues (Postgres data is kept; the AWS emulator resets) |
+| `pnpm worker` | Summarizer worker (SQS → LLM → Postgres) |
 | `pnpm dev` | Next dev server |
 | `pnpm db:generate` | Generate a SQL migration from `src/db/schema.ts` |
 | `pnpm db:migrate` | Apply migrations |

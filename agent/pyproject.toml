@@ -1,0 +1,30 @@
+[project]
+name = "meet-agent"
+version = "0.1.0"
+description = "Meet AI voice agent: LiveKit Agents with env-selected STT, LLM and TTS providers"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "livekit-agents[openai,silero,aws]>=1.2",
+    "boto3>=1.35",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+]
+
+[build-system]
+requires = ["uv_build>=0.8,<0.12"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "N"]

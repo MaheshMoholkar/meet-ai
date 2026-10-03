@@ -12,7 +12,17 @@ export default defineConfig({
     baseURL,
     trace: "retain-on-failure",
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        // Fake microphone/camera so calls can connect without prompts.
+        launchOptions: { args: ["--use-fake-ui-for-media-stream", "--use-fake-device-for-media-stream"] },
+        permissions: ["microphone"],
+      },
+    },
+  ],
   webServer: {
     command: `pnpm exec next dev --port ${PORT}`,
     url: `${baseURL}/sign-in`,

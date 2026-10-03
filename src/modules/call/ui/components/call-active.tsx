@@ -2,12 +2,14 @@
 
 import {
   BarVisualizer,
-  ControlBar,
+  DisconnectButton,
+  TrackToggle,
   useConnectionState,
   useVoiceAssistant,
   type AgentState,
 } from "@livekit/components-react";
-import { ConnectionState } from "livekit-client";
+import { ConnectionState, Track } from "livekit-client";
+import { PhoneOffIcon } from "lucide-react";
 import Link from "next/link";
 
 import { GeneratedAvatar } from "@/components/generated-avatar";
@@ -55,11 +57,14 @@ export function CallActive({ meetingName, agentName }: { meetingName: string; ag
         </p>
       </main>
 
-      <footer className="rounded-full bg-[#101213] px-4">
-        <ControlBar
-          variation="minimal"
-          controls={{ microphone: true, camera: false, screenShare: false, chat: false, leave: true }}
-        />
+      <footer className="flex items-center justify-center gap-x-3 rounded-full bg-[#101213] p-3">
+        <TrackToggle source={Track.Source.Microphone} aria-label="Toggle microphone">
+          Microphone
+        </TrackToggle>
+        <DisconnectButton className="lk-disconnect-button">
+          <PhoneOffIcon className="size-4" />
+          Leave
+        </DisconnectButton>
       </footer>
     </div>
   );

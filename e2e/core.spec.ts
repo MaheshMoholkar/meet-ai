@@ -1,20 +1,6 @@
-import { randomUUID } from "node:crypto";
+import { expect, test } from "@playwright/test";
 
-import { expect, test, type Page } from "@playwright/test";
-
-async function signUp(page: Page) {
-  const email = `e2e-${randomUUID()}@example.com`;
-
-  await page.goto("/sign-up");
-  await page.getByLabel("Name").fill("E2E User");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill("correct-horse-battery");
-  await page.getByLabel("Confirm password").fill("correct-horse-battery");
-  await page.getByRole("button", { name: "Sign up" }).click();
-
-  await expect(page).toHaveURL(/\/meetings$/);
-  return email;
-}
+import { signUp } from "./helpers";
 
 test("signed-out visitors are sent to sign-in", async ({ page }) => {
   await page.goto("/meetings");
@@ -30,7 +16,7 @@ test("sign-up validates the form before submitting", async ({ page }) => {
 });
 
 test("agent and meeting lifecycle", async ({ page }) => {
-  const email = await signUp(page);
+  const { email } = await signUp(page);
   await expect(page.getByText("Create your first meeting")).toBeVisible();
 
   // Create an agent.
