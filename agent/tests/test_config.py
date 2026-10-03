@@ -53,3 +53,10 @@ def test_reports_every_missing_variable():
 def test_rejects_unknown_provider():
     with pytest.raises(ConfigError, match="STT_PROVIDER"):
         from_env(BASE | {"STT_PROVIDER": "azure"})
+
+
+def test_provider_timeout_defaults_to_30_and_is_validated():
+    assert from_env(BASE).provider_timeout_sec == 30.0
+    assert from_env(BASE | {"AGENT_PROVIDER_TIMEOUT_SEC": "12.5"}).provider_timeout_sec == 12.5
+    with pytest.raises(ConfigError, match="AGENT_PROVIDER_TIMEOUT_SEC"):
+        from_env(BASE | {"AGENT_PROVIDER_TIMEOUT_SEC": "0"})

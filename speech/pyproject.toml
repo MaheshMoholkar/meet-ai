@@ -1,0 +1,15 @@
+[project]
+name = "meet-speech"
+version = "0.1.0"
+description = "Local speech server for dev: Whisper (STT) and Kokoro (TTS) on Apple Silicon via mlx-audio, OpenAI-compatible"
+# misaki (Kokoro's phonemizer) doesn't support Python 3.13 yet.
+requires-python = "==3.12.*"
+dependencies = [
+    "mlx-audio[server,stt]>=0.5.7",
+    "misaki[en]",
+    # spaCy would otherwise pip-install this at runtime, and uv environments have no pip.
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+]
+
+[tool.uv]
+package = false

@@ -5,7 +5,7 @@ export DOCKER_CONTEXT := desktop-linux
 export LIVEKIT_NODE_IP ?= $(shell ipconfig getifaddr en0 2>/dev/null || echo 127.0.0.1)
 
 .PHONY: up down logs dev db-generate db-migrate db-studio aws-init test e2e check \
-	agent agent-test speech
+	agent agent-test speech speech-warmup warmup
 
 up: ## Start infrastructure, wait until healthy, create S3/SQS resources
 	docker compose up -d --wait
@@ -47,5 +47,11 @@ agent: ## Voice agent worker in dev mode (needs `make up` and `make speech`)
 agent-test:
 	cd agent && uv run pytest && uv run ruff check src tests
 
-speech: ## Local Whisper + Kokoro server (Metal), OpenAI-compatible
-	cd agent && uv run --group speech python -m meet_agent.speech_server
+speech: ## Local Whisper + Kokoro server (Metal), OpenAI-compatible, port 8000
+	./speech/run.sh
+
+speech-warmup: ## Load both speech models (first call would otherwise time out)
+	./speech/warmup.sh
+
+warmup: speech-warmup ## Load speech models and pin the Ollama model in memory
+	./scripts/llm-warmup.sh

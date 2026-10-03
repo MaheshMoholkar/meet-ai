@@ -51,6 +51,7 @@ class Settings:
     llm_api_key: str
     llm_model: str
     llm_reasoning_effort: str | None
+    provider_timeout_sec: float
 
     aws_region: str
     aws_endpoint_url: str | None
@@ -68,6 +69,19 @@ def _provider(env: dict[str, str], key: str) -> Provider:
     if value not in ("openai_compatible", "aws"):
         raise ConfigError(f"{key} must be 'openai_compatible' or 'aws', got {value!r}")
     return value  # type: ignore[return-value]
+
+
+def _positive_float(env: dict[str, str], key: str, default: float) -> float:
+    raw = (env.get(key) or "").strip()
+    if not raw:
+        return default
+    try:
+        value = float(raw)
+    except ValueError as error:
+        raise ConfigError(f"{key} must be a number, got {raw!r}") from error
+    if value <= 0:
+        raise ConfigError(f"{key} must be positive, got {raw!r}")
+    return value
 
 
 def from_env(env: dict[str, str] | None = None) -> Settings:
@@ -108,6 +122,7 @@ def from_env(env: dict[str, str] | None = None) -> Settings:
         llm_api_key=optional("LLM_API_KEY", "ollama") or "ollama",
         llm_model=required("LLM_MODEL"),
         llm_reasoning_effort=optional("LLM_REASONING_EFFORT"),
+        provider_timeout_sec=_positive_float(env, "AGENT_PROVIDER_TIMEOUT_SEC", 30.0),
         aws_region=optional("AWS_REGION", "us-east-1") or "us-east-1",
         aws_endpoint_url=optional("AWS_ENDPOINT_URL"),
         aws_access_key_id=optional("AWS_ACCESS_KEY_ID"),

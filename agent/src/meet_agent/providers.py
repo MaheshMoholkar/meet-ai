@@ -53,5 +53,6 @@ def build_tts(settings: Settings) -> Any:
         voice=settings.tts_voice,
         base_url=settings.tts_base_url,
         api_key=_UNUSED_KEY,
-        response_format="mp3",
+        # pcm: mp3 would need ffmpeg on the speech server.
+        response_format="pcm",
     )

@@ -20,10 +20,12 @@ from livekit.agents import (
     Agent,
     AgentServer,
     AgentSession,
+    APIConnectOptions,
     ConversationItemAddedEvent,
     JobContext,
     room_io,
 )
+from livekit.agents.voice.agent_session import SessionConnectOptions
 from livekit.plugins import silero
 
 from meet_agent.config import from_env, load_dotenv
@@ -78,6 +80,12 @@ async def entrypoint(ctx: JobContext) -> None:
         vad=silero.VAD.load(),
         # Explicit VAD turn-taking: the defaults call LiveKit Cloud services.
         turn_handling={"turn_detection": "vad", "interruption": {"mode": "vad"}},
+        # Local models can take a while on their first request (the default is 10 s).
+        conn_options=SessionConnectOptions(
+            stt_conn_options=APIConnectOptions(timeout=settings.provider_timeout_sec),
+            llm_conn_options=APIConnectOptions(timeout=settings.provider_timeout_sec),
+            tts_conn_options=APIConnectOptions(timeout=settings.provider_timeout_sec),
+        ),
         userdata=state,
     )
 
