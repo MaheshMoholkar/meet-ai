@@ -27,9 +27,10 @@ export default defineConfig({
     command: `pnpm exec next dev --port ${PORT}`,
     url: `${baseURL}/sign-in`,
     timeout: 180_000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     // Process env wins over .env, so E2E runs against the test database.
     env: {
+      NEXT_DIST_DIR: ".next-e2e",
       DATABASE_URL:
         process.env.TEST_DATABASE_URL ?? "postgres://meetai:meetai@localhost:5432/meetai_test",
       BETTER_AUTH_URL: baseURL,
