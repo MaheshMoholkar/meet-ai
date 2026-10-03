@@ -9,7 +9,7 @@ A rebuild of CodeWithAntonio's Meet AI with the SaaS dependencies replaced by se
 | # | Sub-project | State |
 |---|---|---|
 | 1 | Core app — auth, agents, meetings, dashboard | ✅ done |
-| 2 | Call stack — LiveKit, Python voice agent, webhooks, daily budget | 🚧 web side done, agent in progress |
+| 2 | Call stack — LiveKit, Python voice agent, webhooks, daily budget | ✅ done |
 | 3 | Post-call pipeline — transcript, summary, recording, Ask AI | ✅ done |
 | 4 | AWS deployment | planned |
 
@@ -51,7 +51,15 @@ make dev                           # infrastructure in Docker, migrations, then 
 pnpm worker                        # summarizer worker (second terminal)
 ```
 
-Calls also need the voice agent and speech models running (see `agent/`), and an Ollama endpoint in `LLM_BASE_URL`.
+For calls, also run (each in its own terminal):
+
+```bash
+make speech        # local Whisper + Kokoro on Metal (port 8000); see speech/
+make warmup        # load the speech models and pin the Ollama model in memory
+make agent         # the voice agent worker; see agent/
+```
+
+`LLM_BASE_URL` must point at an Ollama: the homelab (`https://ollama.lab.maheshmoholkar.in/v1`, needs Tailscale) or a local one (`http://localhost:11434/v1`). With Ollama.app's default 4k context, set `LLM_MAX_INPUT_TOKENS=3000`.
 
 Open http://localhost:3000 and sign up with any email and password. GitHub and Google sign-in appear once their client id and secret are set in `.env`.
 
@@ -67,7 +75,8 @@ The Makefile pins Docker to the local `desktop-linux` context, so a globally sel
 | `pnpm db:generate` | Generate a SQL migration from `src/db/schema.ts` |
 | `pnpm db:migrate` | Apply migrations |
 | `pnpm test` | Unit + integration tests (Vitest, against the `meetai_test` database) |
-| `pnpm test:e2e` | Playwright E2E (starts its own dev server on port 3100 against `meetai_test`) |
+| `pnpm test:e2e` | Playwright E2E (own dev server on port 3100 against `meetai_test`; runs next to `pnpm dev`) |
+| `make agent-test` | Agent tests (pytest) and ruff |
 | `pnpm typecheck` / `pnpm lint` / `pnpm build` | Checks |
 
 ## Layout
