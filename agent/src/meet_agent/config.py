@@ -119,7 +119,11 @@ def from_env(env: dict[str, str] | None = None) -> Settings:
     if stt_provider == "openai_compatible" and not settings.stt_model:
         missing.append("STT_MODEL")
     if tts_provider == "openai_compatible" and not (settings.tts_model and settings.tts_voice):
-        missing.extend(key for key, value in (("TTS_MODEL", settings.tts_model), ("TTS_VOICE", settings.tts_voice)) if not value)
+        missing.extend(
+            key
+            for key, value in (("TTS_MODEL", settings.tts_model), ("TTS_VOICE", settings.tts_voice))
+            if not value
+        )
 
     if missing:
         raise ConfigError("missing environment variables: " + ", ".join(sorted(set(missing))))

@@ -42,10 +42,10 @@ check: ## Typecheck, lint, build
 	pnpm typecheck && pnpm lint && pnpm build
 
 agent: ## Voice agent worker in dev mode (needs `make up` and `make speech`)
-	cd agent && uv run python -m meet_agent dev
+	cd agent && uv run -m livekit.agents start src/meet_agent/agent.py --dev
 
 agent-test:
-	cd agent && uv run pytest
+	cd agent && uv run pytest && uv run ruff check src tests
 
 speech: ## Local Whisper + Kokoro server (Metal), OpenAI-compatible
 	cd agent && uv run --group speech python -m meet_agent.speech_server
