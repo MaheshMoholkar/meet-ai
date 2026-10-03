@@ -145,6 +145,23 @@ export const meetings = pgTable(
   ],
 );
 
+export const messageRole = pgEnum("message_role", ["user", "assistant"]);
+
+/** Ask AI chat history for a completed meeting (spec §6.4). */
+export const meetingMessages = pgTable(
+  "meeting_messages",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    meetingId: uuid("meeting_id")
+      .notNull()
+      .references(() => meetings.id, { onDelete: "cascade" }),
+    role: messageRole("role").notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("meeting_messages_meeting_id_created_at_idx").on(table.meetingId, table.createdAt)],
+);
+
 // Duration in seconds; null until the call has both started and ended.
 export const meetingDuration = sql<
   number | null

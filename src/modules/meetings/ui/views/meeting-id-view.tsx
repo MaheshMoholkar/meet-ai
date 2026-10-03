@@ -11,13 +11,8 @@ import { useConfirm } from "@/hooks/use-confirm";
 import { useTRPC } from "@/trpc/client";
 
 import { UpdateMeetingDialog } from "../components/meeting-dialogs";
-import {
-  ActiveState,
-  CompletedState,
-  FailedState,
-  ProcessingState,
-  UpcomingState,
-} from "../components/meeting-states";
+import { CompletedState } from "../components/completed-state";
+import { ActiveState, FailedState, ProcessingState, UpcomingState } from "../components/meeting-states";
 
 export function MeetingIdView({ meetingId }: { meetingId: string }) {
   const trpc = useTRPC();
@@ -59,8 +54,8 @@ export function MeetingIdView({ meetingId }: { meetingId: string }) {
           onEdit={() => setEditOpen(true)}
           onRemove={onRemove}
         />
-        {data.status === "upcoming" && <UpcomingState />}
-        {data.status === "active" && <ActiveState />}
+        {data.status === "upcoming" && <UpcomingState meetingId={meetingId} />}
+        {data.status === "active" && <ActiveState meetingId={meetingId} />}
         {data.status === "processing" && <ProcessingState />}
         {data.status === "completed" && <CompletedState data={data} />}
         {data.status === "failed" && <FailedState />}

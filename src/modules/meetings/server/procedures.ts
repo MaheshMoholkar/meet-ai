@@ -4,11 +4,15 @@ import { z } from "zod";
 
 import { PROCESSING_TIMEOUT_MINUTES } from "@/constants";
 import { db } from "@/db";
-import { agents, meetingDuration, meetings } from "@/db/schema";
+import { agents, meetingDuration, meetingMessages, meetings } from "@/db/schema";
+import { env } from "@/env";
+import { presignedGetUrl } from "@/lib/aws";
+import { createMeetingRoom, createParticipantToken } from "@/lib/livekit";
 import { containsPattern, pageOffset, paginationInput, totalPages } from "@/lib/pagination";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 
 import { MEETING_STATUSES, meetingsInsertSchema, meetingsUpdateSchema } from "../schemas";
+import { remainingBudgetSeconds } from "./budget";
 
 // List rows leave out the transcript and summary, which can be large.
 const meetingListColumns = {
@@ -107,6 +111,49 @@ export const meetingsRouter = createTRPCRouter({
     return meeting ?? notFound();
   }),
 
+  /** Transcript items plus the names to show for each speaker. */
+  getTranscript: protectedProcedure.input(z.object({ id: z.uuid() })).query(async ({ ctx, input }) => {
+    const [meeting] = await db
+      .select({ transcript: meetings.transcript, agentName: agents.name })
+      .from(meetings)
+      .innerJoin(agents, eq(meetings.agentId, agents.id))
+      .where(and(eq(meetings.id, input.id), eq(meetings.userId, ctx.session.user.id)));
+
+    if (!meeting) notFound();
+
+    return {
+      items: meeting.transcript ?? [],
+      names: { user: ctx.session.user.name, agent: meeting.agentName },
+      userImage: ctx.session.user.image ?? null,
+    };
+  }),
+
+  /** A 15-minute link to the audio recording, or null if there isn't one (spec §6.3). */
+  getRecordingUrl: protectedProcedure.input(z.object({ id: z.uuid() })).query(async ({ ctx, input }) => {
+    const [meeting] = await db
+      .select({ recordingKey: meetings.recordingKey })
+      .from(meetings)
+      .where(and(eq(meetings.id, input.id), eq(meetings.userId, ctx.session.user.id)));
+
+    if (!meeting) notFound();
+    return meeting.recordingKey ? presignedGetUrl(meeting.recordingKey) : null;
+  }),
+
+  /** Ask AI history, oldest first. */
+  getMessages: protectedProcedure.input(z.object({ id: z.uuid() })).query(async ({ ctx, input }) => {
+    const owned = await db.$count(
+      meetings,
+      and(eq(meetings.id, input.id), eq(meetings.userId, ctx.session.user.id)),
+    );
+    if (owned === 0) notFound();
+
+    return db
+      .select({ id: meetingMessages.id, role: meetingMessages.role, content: meetingMessages.content })
+      .from(meetingMessages)
+      .where(eq(meetingMessages.meetingId, input.id))
+      .orderBy(meetingMessages.createdAt, meetingMessages.id);
+  }),
+
   create: protectedProcedure.input(meetingsInsertSchema).mutation(async ({ ctx, input }) => {
     const userId = ctx.session.user.id;
 
@@ -133,6 +180,57 @@ export const meetingsRouter = createTRPCRouter({
       .returning();
 
     return updated ?? notFound();
+  }),
+
+  /**
+   * Starts (or rejoins) the call: creates the LiveKit room with the voice agent
+   * dispatched and recording on, and returns a token for this user (spec §5.1).
+   */
+  join: protectedProcedure.input(z.object({ id: z.uuid() })).mutation(async ({ ctx, input }) => {
+    const { user } = ctx.session;
+
+    const [meeting] = await db
+      .select({
+        id: meetings.id,
+        status: meetings.status,
+        agentName: agents.name,
+        instructions: agents.instructions,
+      })
+      .from(meetings)
+      .innerJoin(agents, eq(meetings.agentId, agents.id))
+      .where(and(eq(meetings.id, input.id), eq(meetings.userId, user.id)));
+
+    if (!meeting) notFound();
+
+    if (meeting.status !== "upcoming" && meeting.status !== "active") {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "This meeting has already ended" });
+    }
+
+    const remainingSec = await remainingBudgetSeconds(env.DAILY_BUDGET_MIN);
+    if (remainingSec <= 0) {
+      throw new TRPCError({
+        code: "PRECONDITION_FAILED",
+        message: "Demo at capacity: today's call minutes are used up. Try again tomorrow.",
+      });
+    }
+
+    try {
+      await createMeetingRoom({
+        meetingId: meeting.id,
+        agentName: meeting.agentName,
+        instructions: meeting.instructions,
+        maxDurationSec: remainingSec,
+      });
+    } catch (cause) {
+      throw new TRPCError({
+        code: "INTERNAL_SERVER_ERROR",
+        message: "Couldn't start the call. Please try again.",
+        cause,
+      });
+    }
+
+    const token = await createParticipantToken({ identity: user.id, name: user.name, room: meeting.id });
+    return { token, serverUrl: env.NEXT_PUBLIC_LIVEKIT_URL };
   }),
 
   remove: protectedProcedure.input(z.object({ id: z.uuid() })).mutation(async ({ ctx, input }) => {

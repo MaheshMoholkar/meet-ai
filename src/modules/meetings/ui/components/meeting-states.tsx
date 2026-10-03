@@ -1,20 +1,10 @@
 "use client";
 
-import {
-  BookOpenTextIcon,
-  CircleXIcon,
-  ClockArrowUpIcon,
-  FileTextIcon,
-  LoaderIcon,
-  RadioIcon,
-  VideoIcon,
-} from "lucide-react";
+import { CircleXIcon, ClockArrowUpIcon, LoaderIcon, RadioIcon, VideoIcon } from "lucide-react";
+import Link from "next/link";
 
 import { EmptyState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
-import type { MeetingGetOne } from "../../types";
 
 function Panel({ children }: { children: React.ReactNode }) {
   return (
@@ -24,25 +14,18 @@ function Panel({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Joining is wired up in sub-project 2 (call stack). */
-function JoinButton({ label }: { label: string }) {
+function JoinButton({ meetingId, label }: { meetingId: string; label: string }) {
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        {/* Disabled buttons don't fire pointer events; the wrapper keeps the tooltip working. */}
-        <span tabIndex={0} className="w-full lg:w-auto">
-          <Button disabled className="w-full lg:w-auto">
-            <VideoIcon />
-            {label}
-          </Button>
-        </span>
-      </TooltipTrigger>
-      <TooltipContent>Calls arrive in the next release</TooltipContent>
-    </Tooltip>
+    <Button asChild className="w-full lg:w-auto">
+      <Link href={`/call/${meetingId}`}>
+        <VideoIcon />
+        {label}
+      </Link>
+    </Button>
   );
 }
 
-export function UpcomingState() {
+export function UpcomingState({ meetingId }: { meetingId: string }) {
   return (
     <Panel>
       <EmptyState
@@ -50,12 +33,12 @@ export function UpcomingState() {
         title="Not started yet"
         description="Once you start this meeting, a summary will appear here."
       />
-      <JoinButton label="Start meeting" />
+      <JoinButton meetingId={meetingId} label="Start meeting" />
     </Panel>
   );
 }
 
-export function ActiveState() {
+export function ActiveState({ meetingId }: { meetingId: string }) {
   return (
     <Panel>
       <EmptyState
@@ -63,7 +46,7 @@ export function ActiveState() {
         title="Meeting is active"
         description="The meeting ends once you leave the call."
       />
-      <JoinButton label="Join meeting" />
+      <JoinButton meetingId={meetingId} label="Join meeting" />
     </Panel>
   );
 }
@@ -87,18 +70,6 @@ export function FailedState() {
         icon={CircleXIcon}
         title="Summary couldn't be generated"
         description="The call ended, but processing it failed. The transcript and summary aren't available for this meeting."
-      />
-    </Panel>
-  );
-}
-
-export function CompletedState({ data }: { data: MeetingGetOne }) {
-  return (
-    <Panel>
-      <EmptyState
-        icon={data.summary ? BookOpenTextIcon : FileTextIcon}
-        title="Meeting completed"
-        description="Summary, transcript, recording and Ask AI arrive with the post-call pipeline."
       />
     </Panel>
   );

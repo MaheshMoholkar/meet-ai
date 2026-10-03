@@ -1,13 +1,17 @@
 # Docker runs infrastructure only; app processes run natively.
 # Pin the local Docker Desktop engine so a globally selected remote context is never used.
 export DOCKER_CONTEXT := desktop-linux
+# LiveKit must advertise an address that both the browser and the Egress container reach.
+export LIVEKIT_NODE_IP ?= $(shell ipconfig getifaddr en0 2>/dev/null || echo 127.0.0.1)
 
-.PHONY: up down logs dev db-generate db-migrate db-studio test test-unit test-integration e2e check
+.PHONY: up down logs dev db-generate db-migrate db-studio aws-init test e2e check \
+	agent agent-test speech
 
-up: ## Start infrastructure and wait until healthy
+up: ## Start infrastructure, wait until healthy, create S3/SQS resources
 	docker compose up -d --wait
+	pnpm aws:init
 
-down: ## Stop infrastructure (data is kept)
+down: ## Stop infrastructure (Postgres data is kept; the AWS emulator resets)
 	docker compose down
 
 logs:
@@ -25,11 +29,23 @@ db-migrate: ## Apply migrations to the dev database
 db-studio:
 	pnpm db:studio
 
-test: up ## Unit + integration tests
+aws-init:
+	pnpm aws:init
+
+test: ## Unit + integration tests (needs `make up`)
 	pnpm test
 
-e2e: up ## Playwright end-to-end tests (builds and starts the app on the test database)
+e2e: ## Playwright end-to-end tests (needs `make up`)
 	pnpm test:e2e
 
 check: ## Typecheck, lint, build
 	pnpm typecheck && pnpm lint && pnpm build
+
+agent: ## Voice agent worker in dev mode (needs `make up` and `make speech`)
+	cd agent && uv run python -m meet_agent dev
+
+agent-test:
+	cd agent && uv run pytest
+
+speech: ## Local Whisper + Kokoro server (Metal), OpenAI-compatible
+	cd agent && uv run --group speech python -m meet_agent.speech_server
