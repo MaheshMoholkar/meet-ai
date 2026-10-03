@@ -89,7 +89,7 @@ tofu output acm_validation_records    # without Route 53: add this CNAME at your
 ### 4. Images
 
 ```bash
-./scripts/push-images.sh              # builds arm64 images locally and pushes :latest
+./scripts/push-images.sh              # builds arm64 images locally (Docker Desktop) and pushes :latest
 ```
 
 ### 5. Everything else
@@ -101,17 +101,20 @@ tofu output dns_records_to_create     # without Route 53: app → CNAME to the A
 
 Caddy on the media server requests its certificate once `rtc_domain` resolves to the Elastic IP; until then browsers can't connect to calls.
 
-### 6. Database
+### 6. Database, then the first real rollout
 
 ```bash
 ./scripts/run-migrations.sh
+./scripts/redeploy.sh                 # fresh deployment of web, worker, agent; waits until stable
 ```
 
-The web and worker tasks crash-loop until this has run once; ECS keeps retrying, and they settle by themselves afterwards.
+Expect the services' **first** deployment (from step 5) to show as failed: the web and worker tasks start before the database has tables, and ECS's deployment circuit breaker stops the rollout instead of retrying. `redeploy.sh` after the migrations is what brings them up. Later deploys run migrations first, so this only happens once.
 
 ### 7. GitHub Actions
 
 Set `github_repository = "owner/repo"` in `terraform.tfvars`, `tofu apply`, then copy `tofu output deploy` into the repository's **Variables** (Settings → Secrets and variables → Actions → Variables) and create a `production` environment. The **Deploy** workflow (manual for now) builds the images on an arm64 runner, pushes them, runs migrations and rolls out the services.
+
+GitHub's `ubuntu-24.04-arm` runners are free for **public** repositories. For a private repository, either use a paid larger runner or switch the job to `ubuntu-24.04` with `docker/setup-qemu-action` (emulated arm64 builds; the Python image gets slow).
 
 ### 8. Smoke test
 

@@ -105,11 +105,11 @@ resource "aws_ecs_task_definition" "app" {
     cpu_architecture        = "ARM64"
   }
 
-  container_definitions = jsonencode([{
+  # merge() leaves `command` out entirely when unset: a JSON null makes ECS report a perpetual diff.
+  container_definitions = jsonencode([merge(each.value.command == null ? {} : { command = each.value.command }, {
     name      = each.key
     image     = local.image[each.key]
     essential = true
-    command   = each.value.command
 
     portMappings = each.value.port == null ? [] : [{ containerPort = each.value.port, protocol = "tcp" }]
 
@@ -127,7 +127,7 @@ resource "aws_ecs_task_definition" "app" {
         awslogs-stream-prefix = each.key
       }
     }
-  }])
+  })])
 }
 
 # One-off: `node dist/migrate.mjs` from the worker image, run by CI before each deploy.

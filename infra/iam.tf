@@ -174,7 +174,11 @@ resource "aws_iam_role" "deploy" {
       Action    = "sts:AssumeRoleWithWebIdentity"
       Condition = {
         StringEquals = { "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com" }
-        StringLike   = { "token.actions.githubusercontent.com:sub" = "repo:${var.github_repository}:ref:refs/heads/main" }
+        # Jobs that use a GitHub environment get an environment-scoped subject.
+        StringLike = { "token.actions.githubusercontent.com:sub" = [
+          "repo:${var.github_repository}:ref:refs/heads/main",
+          "repo:${var.github_repository}:environment:production",
+        ] }
       }
     }]
   })

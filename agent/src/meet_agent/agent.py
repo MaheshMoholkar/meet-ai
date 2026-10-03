@@ -44,6 +44,9 @@ server = AgentServer(
     ws_url=settings.livekit_url,
     api_key=settings.livekit_api_key,
     api_secret=settings.livekit_api_secret,
+    # Production mode otherwise pre-forks one warm process per CPU; one is plenty
+    # for a demo and keeps a 1 GB Fargate task well inside its memory.
+    num_idle_processes=1,
 )
 
 
