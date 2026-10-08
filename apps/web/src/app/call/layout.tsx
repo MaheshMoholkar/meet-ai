@@ -1,5 +1,3 @@
-import "@livekit/components-styles";
-
 import { redirect } from "next/navigation";
 
 import { createTRPCContext } from "@/trpc/init";
@@ -11,5 +9,6 @@ export default async function CallLayout({ children }: { children: React.ReactNo
     redirect("/sign-in");
   }
 
-  return <div className="h-svh bg-black text-white">{children}</div>;
+  // Sound is shown on Night: the call screen is dark whatever the app's theme.
+  return <div className="dark h-svh bg-background text-foreground">{children}</div>;
 }

@@ -10,11 +10,11 @@ export function DataPagination({ page, totalPages, onPageChange }: Props) {
   const lastPage = Math.max(totalPages, 1);
 
   return (
-    <div className="flex items-center justify-between">
-      <div className="flex-1 text-sm text-muted-foreground">
+    <div className="flex items-center justify-between px-2 py-3">
+      <p className="text-xs font-medium text-muted-foreground">
         Page {page} of {lastPage}
-      </div>
-      <div className="flex items-center justify-end gap-x-2 py-4">
+      </p>
+      <div className="flex items-center gap-x-2">
         <Button
           disabled={page <= 1}
           variant="outline"

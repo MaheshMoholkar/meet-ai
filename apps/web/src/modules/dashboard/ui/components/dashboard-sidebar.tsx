@@ -4,7 +4,7 @@ import { BotIcon, VideoIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { Logo } from "@/components/icons";
+import { LogoLockup } from "@/components/icons";
 import {
   Sidebar,
   SidebarContent,
@@ -15,9 +15,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
+import { DashboardSearchButton } from "./dashboard-search";
 import { DashboardUserButton, type DashboardUser } from "./dashboard-user-button";
 
 const navItems = [
@@ -25,28 +25,29 @@ const navItems = [
   { icon: BotIcon, label: "Agents", href: "/agents" },
 ] as const;
 
+/** The app's one piece of navigation: the mark, search, Meetings, Agents, and you. */
 export function DashboardSidebar({ user }: { user: DashboardUser }) {
   const pathname = usePathname();
 
   return (
     <Sidebar>
-      <SidebarHeader>
-        <Link href="/meetings" className="flex items-center gap-2 px-2 pt-2">
-          <Logo className="size-8 text-sidebar-primary" />
-          <span className="text-xl font-semibold">Meet AI</span>
+      <SidebarHeader className="gap-4 p-3">
+        <Link href="/meetings" className="focus-ring w-fit rounded-md px-1 pt-1">
+          <LogoLockup />
         </Link>
+        <DashboardSearchButton />
       </SidebarHeader>
-      <SidebarSeparator className="mx-0" />
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="px-3 py-1">
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-0.5">
               {navItems.map(({ icon: Icon, label, href }) => (
                 <SidebarMenuItem key={href}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(href)} className="h-10">
-                    <Link href={href}>
+                  {/* The current item is ink on a quiet fill. Blue is the agent's, not the navigation's. */}
+                  <SidebarMenuButton asChild isActive={pathname.startsWith(href)}>
+                    <Link href={href} aria-current={pathname.startsWith(href) ? "page" : undefined}>
                       <Icon />
-                      <span className="font-medium tracking-tight">{label}</span>
+                      <span>{label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -55,7 +56,7 @@ export function DashboardSidebar({ user }: { user: DashboardUser }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="p-3">
         <DashboardUserButton user={user} />
       </SidebarFooter>
     </Sidebar>

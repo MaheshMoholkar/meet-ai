@@ -37,12 +37,12 @@ export function SearchFilter({ value, onChange, placeholder }: Props) {
     <div className="relative">
       <Input
         placeholder={placeholder}
-        className="h-9 w-50 bg-background pl-7"
+        className="w-60 pl-[34px]"
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         aria-label={placeholder}
       />
-      <SearchIcon className="absolute top-1/2 left-2 size-4 -translate-y-1/2 text-muted-foreground" />
+      <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
     </div>
   );
 }

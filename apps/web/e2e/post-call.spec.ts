@@ -30,8 +30,8 @@ test("completed meeting shows summary, searchable transcript and recording state
   await expect(page.getByText("How do I add one half")).toBeHidden();
   await expect(page.locator("mark", { hasText: "denominator" })).toBeVisible();
 
-  await page.getByRole("tab", { name: "Recording" }).click();
-  await expect(page.getByText(/no recording for this meeting/)).toBeVisible();
+  // The recording is a strip above the tabs, not a tab of its own.
+  await expect(page.getByRole("region", { name: "Recording" })).toContainText(/no recording for this meeting/);
 });
 
 test("Ask AI answers from the summary and keeps the history", async ({ page }) => {

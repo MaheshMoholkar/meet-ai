@@ -2,15 +2,15 @@
 
 import { LiveKitRoom, RoomAudioRenderer } from "@livekit/components-react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { Loader2Icon } from "lucide-react";
+import { CircleAlertIcon, Loader2Icon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
-import { ErrorState } from "@/components/state-views";
 import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client";
 
 import { CallActive } from "../components/call-active";
+import { CallCard, CallCardTitle } from "../components/call-card";
 import { CallEnded } from "../components/call-ended";
 import { CallLobby } from "../components/call-lobby";
 
@@ -40,13 +40,11 @@ export function CallView({ meetingId }: { meetingId: string }) {
 
   if (meeting.status !== "upcoming" && meeting.status !== "active") {
     return (
-      <div className="flex h-full items-center justify-center bg-radial from-sidebar-accent to-sidebar">
-        <ErrorState title="This meeting has ended" description="You can't join it again, but its results are on the meeting page.">
-          <Button asChild>
-            <Link href={`/meetings/${meetingId}`}>Open meeting</Link>
-          </Button>
-        </ErrorState>
-      </div>
+      <CallMessage title="This meeting has ended" description="You can't join it again, but its results are on the meeting page.">
+        <Button asChild size="lg">
+          <Link href={`/meetings/${meetingId}`}>Open meeting</Link>
+        </Button>
+      </CallMessage>
     );
   }
 
@@ -71,7 +69,6 @@ export function CallView({ meetingId }: { meetingId: string }) {
       audio
       video={false}
       onDisconnected={onLeft}
-      data-lk-theme="default"
       className="h-full"
     >
       <CallActive meetingName={meeting.name} agentName={meeting.agent.name} />
@@ -82,16 +79,42 @@ export function CallView({ meetingId }: { meetingId: string }) {
 
 export function CallViewLoading() {
   return (
-    <div className="flex h-full items-center justify-center">
-      <Loader2Icon className="size-6 animate-spin" />
+    <div aria-busy="true" aria-label="Loading call" className="flex h-full items-center justify-center">
+      <Loader2Icon className="size-6 animate-spin text-muted-foreground" />
     </div>
   );
 }
 
 export function CallViewError() {
   return (
-    <div className="flex h-full items-center justify-center bg-radial from-sidebar-accent to-sidebar">
-      <ErrorState title="Couldn't load this meeting" description="It may have been deleted, or it isn't yours." />
-    </div>
+    <CallMessage title="Couldn't load this meeting" description="It may have been deleted, or it isn't yours.">
+      <Button asChild variant="outline" size="lg">
+        <Link href="/meetings">Back to meetings</Link>
+      </Button>
+    </CallMessage>
+  );
+}
+
+/** A call that can't happen, said on the same card as the lobby. */
+function CallMessage({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <CallCard>
+      <div className="flex size-11 items-center justify-center rounded-lg bg-muted">
+        <CircleAlertIcon className="size-5" />
+      </div>
+      <div className="flex flex-col gap-y-2">
+        <CallCardTitle>{title}</CallCardTitle>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      {children}
+    </CallCard>
   );
 }

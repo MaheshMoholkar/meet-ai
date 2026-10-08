@@ -1,30 +1,31 @@
 "use client";
 
-import { PlusIcon, XCircleIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
 import { CommandSelect } from "@/components/command-select";
+import { PageHeader } from "@/components/page-header";
 import { SearchFilter } from "@/components/search-filter";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DEFAULT_PAGE } from "@/constants";
-import { cn } from "@/lib/utils";
 
 import { useMeetingsFilters } from "../../hooks/use-meetings-filters";
 import { MEETING_STATUSES, type MeetingStatus } from "../../schemas";
 import { statusMeta } from "../status";
 import { AgentSelect } from "./agent-select";
 import { NewMeetingDialog } from "./meeting-dialogs";
+import { StatusIcon } from "./status-badge";
 
 const statusOptions = MEETING_STATUSES.map((status) => {
-  const { label, icon: Icon, spin } = statusMeta[status];
+  const { label } = statusMeta[status];
   return {
     id: status,
     value: status,
     label,
     children: (
       <div className="flex items-center gap-x-2">
-        <Icon className={cn("size-4", spin && "animate-spin")} />
+        <StatusIcon status={status} className="size-4 text-muted-foreground" />
         {label}
       </div>
     ),
@@ -40,15 +41,18 @@ export function MeetingsListHeader() {
   return (
     <>
       <NewMeetingDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-      <div className="flex flex-col gap-y-4 px-4 py-4 md:px-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-medium">My meetings</h1>
-          <Button onClick={() => setDialogOpen(true)}>
-            <PlusIcon />
-            New meeting
-          </Button>
-        </div>
+      <div className="flex flex-col gap-y-6 pb-5">
+        <PageHeader
+          title="My meetings"
+          action={
+            <Button onClick={() => setDialogOpen(true)}>
+              <PlusIcon />
+              New meeting
+            </Button>
+          }
+        />
         <ScrollArea>
+          {/* The padding keeps focus outlines from being clipped by the scroll area. */}
           <div className="flex items-center gap-x-2 p-1">
             <SearchFilter
               value={filters.search}
@@ -56,26 +60,24 @@ export function MeetingsListHeader() {
               placeholder="Filter by name"
             />
             <CommandSelect
-              className="h-9 w-40 bg-background"
+              className="w-40"
               placeholder="Status"
               options={statusOptions}
               value={filters.status ?? ""}
               onSelect={(status) => setFilters({ status: status as MeetingStatus, page: DEFAULT_PAGE })}
             />
             <AgentSelect
-              className="h-9 w-48 bg-background"
+              className="w-48"
               placeholder="Agent"
               value={filters.agentId ?? ""}
               onSelect={(agentId) => setFilters({ agentId, page: DEFAULT_PAGE })}
             />
             {hasFilters && (
               <Button
-                variant="outline"
-                size="sm"
-                className="h-9"
+                variant="ghost"
                 onClick={() => setFilters({ search: "", status: null, agentId: null, page: DEFAULT_PAGE })}
               >
-                <XCircleIcon />
+                <XIcon />
                 Clear
               </Button>
             )}

@@ -8,12 +8,12 @@ import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { GitHubIcon, GoogleIcon, Logo } from "@/components/icons";
+import { GitHubIcon, GoogleIcon, LogoLockup } from "@/components/icons";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { VoiceBars } from "@/components/voice-bars";
 import type { SocialProvider } from "@/env";
 import { authClient } from "@/lib/auth-client";
 
@@ -104,14 +104,17 @@ export function AuthView({ mode, socialProviders }: Props) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8" noValidate>
+    <div className="grid min-h-svh lg:grid-cols-2">
+      <div className="flex flex-col justify-center px-6 py-10 sm:px-16">
+        <div className="mx-auto w-full max-w-[360px]">
+          <LogoLockup />
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-10" noValidate>
             <FieldGroup>
-              <div className="flex flex-col items-center text-center">
-                <h1 className="text-2xl font-bold">{isSignUp ? "Create an account" : "Welcome back"}</h1>
-                <p className="text-balance text-muted-foreground">
+              <div>
+                <h1 className="font-heading text-2xl leading-[30px] font-semibold tracking-[-0.015em]">
+                  {isSignUp ? "Create an account" : "Welcome back"}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
                   {isSignUp ? "Start talking to your own AI agents" : "Sign in to your account"}
                 </p>
               </div>
@@ -131,6 +134,7 @@ export function AuthView({ mode, socialProviders }: Props) {
                         placeholder={fieldConfig[name].placeholder}
                         autoComplete={name === "confirmPassword" ? "new-password" : name}
                         aria-invalid={fieldState.invalid}
+                        className="h-10"
                       />
                       {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                     </Field>
@@ -139,28 +143,27 @@ export function AuthView({ mode, socialProviders }: Props) {
               ))}
 
               {error && (
-                <Alert variant="destructive" className="border-none bg-destructive/10">
+                <Alert variant="destructive">
                   <OctagonAlertIcon />
                   <AlertTitle>{error}</AlertTitle>
                 </Alert>
               )}
 
-              <Button type="submit" className="w-full" disabled={pending}>
+              <Button type="submit" size="lg" className="w-full" disabled={pending}>
                 {isSignUp ? "Sign up" : "Sign in"}
               </Button>
 
               {socialProviders.length > 0 && (
                 <>
-                  <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-                    <span className="relative z-10 bg-card px-2 text-muted-foreground">
-                      Or continue with
-                    </span>
+                  <div className="flex items-center gap-x-3 text-[13px] leading-[18px] text-muted-foreground before:h-px before:flex-1 before:bg-border after:h-px after:flex-1 after:bg-border">
+                    Or continue with
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-3">
                     {socialProviders.includes("google") && (
                       <Button
                         type="button"
                         variant="outline"
+                        size="lg"
                         disabled={pending}
                         onClick={() => onSocial("google")}
                       >
@@ -171,6 +174,7 @@ export function AuthView({ mode, socialProviders }: Props) {
                       <Button
                         type="button"
                         variant="outline"
+                        size="lg"
                         disabled={pending}
                         onClick={() => onSocial("github")}
                       >
@@ -181,24 +185,33 @@ export function AuthView({ mode, socialProviders }: Props) {
                 </>
               )}
 
-              <p className="text-center text-sm">
+              <p className="text-[13px] leading-[18px] text-muted-foreground">
                 {isSignUp ? "Already have an account? " : "Don't have an account? "}
                 <Link
                   href={isSignUp ? "/sign-in" : "/sign-up"}
-                  className="underline underline-offset-4"
+                  className="focus-ring rounded-sm text-agent-text underline underline-offset-4"
                 >
                   {isSignUp ? "Sign in" : "Sign up"}
                 </Link>
               </p>
             </FieldGroup>
           </form>
+        </div>
+      </div>
 
-          <div className="relative hidden flex-col items-center justify-center gap-y-4 bg-radial from-sidebar-accent to-sidebar text-sidebar-foreground md:flex">
-            <Logo className="size-20 text-sidebar-primary" />
-            <p className="text-2xl font-semibold">Meet AI</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Night panel: one turn of conversation drawn in voice bars — you, the agent, you. */}
+      <div className="dark relative hidden flex-col justify-end overflow-hidden bg-background p-16 lg:flex">
+        <div aria-hidden="true" className="absolute inset-x-16 top-16 flex items-center justify-between">
+          <VoiceBars speaker="you" levels={[0.3, 0.62, 0.44]} />
+          <VoiceBars size="lg" speaker="agent" levels={[0.26, 0.5, 0.82, 1, 0.68, 0.4, 0.2]} />
+          <VoiceBars speaker="you" levels={[0.5, 0.9, 0.7, 0.34]} />
+        </div>
+        <p className="font-heading text-[56px] leading-[56px] font-semibold tracking-[-0.03em]">Talk it through.</p>
+        <p className="mt-4 max-w-[34ch] text-base leading-[26px] text-muted-foreground">
+          Voice calls with AI agents you design. Hang up, and the transcript, the recording and a summary are
+          waiting.
+        </p>
+      </div>
     </div>
   );
 }

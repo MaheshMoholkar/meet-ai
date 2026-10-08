@@ -71,14 +71,20 @@ export function AgentForm({ initialValues, onSuccess, onCancel }: Props) {
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} noValidate>
       <FieldGroup>
-        <GeneratedAvatar seed={name || "agent"} variant="botttsNeutral" className="size-16 border" />
+        <GeneratedAvatar seed={name || "agent"} variant="botttsNeutral" className="size-16" />
         <Controller
           name="name"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor="agent-name">Name</FieldLabel>
-              <Input {...field} id="agent-name" placeholder="e.g. Math tutor" aria-invalid={fieldState.invalid} />
+              <Input
+                {...field}
+                id="agent-name"
+                placeholder="e.g. Math tutor"
+                aria-invalid={fieldState.invalid}
+                className="h-10"
+              />
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

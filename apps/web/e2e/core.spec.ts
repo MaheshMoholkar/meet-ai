@@ -59,7 +59,7 @@ test("agent and meeting lifecycle", async ({ page }) => {
   await page.getByRole("cell", { name: /Geometry practice/ }).click();
   await page.getByRole("button", { name: "Actions" }).click();
   await page.getByRole("menuitem", { name: "Delete" }).click();
-  await page.getByRole("button", { name: "Confirm" }).click();
+  await page.getByRole("button", { name: "Delete meeting" }).click();
   await expect(page).toHaveURL(/\/meetings$/);
   await expect(page.getByText("Create your first meeting")).toBeVisible();
 

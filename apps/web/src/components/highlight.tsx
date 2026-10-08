@@ -12,7 +12,7 @@ export function Highlight({ text, query }: { text: string; query: string }) {
       {parts.map((part, index) =>
         // With a capturing group, odd indexes are the matches.
         index % 2 === 1 ? (
-          <mark key={index} className="rounded-sm bg-yellow-200 text-inherit">
+          <mark key={index} className="-mx-0.5 rounded-[3px] bg-highlight px-0.5 text-inherit">
             {part}
           </mark>
         ) : (

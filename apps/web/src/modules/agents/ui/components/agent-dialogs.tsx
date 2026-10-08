@@ -12,7 +12,7 @@ interface DialogProps {
 
 export function NewAgentDialog({ open, onOpenChange }: DialogProps) {
   return (
-    <ResponsiveDialog title="New agent" description="Create a new agent" open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog title="New agent" description="An agent is the AI you'll talk to in meetings." open={open} onOpenChange={onOpenChange}>
       <AgentForm onSuccess={() => onOpenChange(false)} onCancel={() => onOpenChange(false)} />
     </ResponsiveDialog>
   );
@@ -24,7 +24,7 @@ export function UpdateAgentDialog({
   initialValues,
 }: DialogProps & { initialValues: AgentGetOne }) {
   return (
-    <ResponsiveDialog title="Edit agent" description="Edit the agent details" open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog title="Edit agent" description="Changes apply to its future meetings." open={open} onOpenChange={onOpenChange}>
       <AgentForm
         initialValues={initialValues}
         onSuccess={() => onOpenChange(false)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDownIcon, LogOutIcon } from "lucide-react";
+import { ChevronsUpDownIcon, LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { GeneratedAvatar } from "@/components/generated-avatar";
@@ -34,18 +34,18 @@ export interface DashboardUser {
 function UserSummary({ user }: { user: DashboardUser }) {
   return (
     <>
-      <GeneratedAvatar seed={user.name} variant="initials" imageUrl={user.image} className="size-9" />
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5 overflow-hidden text-left">
-        <p className="w-full truncate text-sm">{user.name}</p>
-        <p className="w-full truncate text-xs text-sidebar-foreground/70">{user.email}</p>
+      <GeneratedAvatar seed={user.name} variant="initials" imageUrl={user.image} />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden text-left">
+        <p className="w-full truncate text-sm leading-[18px] font-semibold">{user.name}</p>
+        <p className="w-full truncate text-xs text-muted-foreground">{user.email}</p>
       </div>
-      <ChevronDownIcon className="size-4 shrink-0" />
+      <ChevronsUpDownIcon className="size-4 shrink-0 text-muted-foreground" />
     </>
   );
 }
 
 const triggerClassName =
-  "flex w-full items-center justify-between gap-x-2 overflow-hidden rounded-lg border border-sidebar-border bg-sidebar-accent/40 p-3 hover:bg-sidebar-accent";
+  "focus-ring flex w-full items-center justify-between gap-x-2.5 overflow-hidden rounded-md p-2 transition-colors hover:bg-sidebar-accent";
 
 export function DashboardUserButton({ user }: { user: DashboardUser }) {
   const router = useRouter();
@@ -87,11 +87,11 @@ export function DashboardUserButton({ user }: { user: DashboardUser }) {
       <DropdownMenuTrigger className={triggerClassName}>
         <UserSummary user={user} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" side="right" className="w-72">
+      <DropdownMenuContent align="end" side="right" className="w-64">
         <DropdownMenuLabel>
-          <div className="flex flex-col gap-1">
-            <span className="truncate font-medium">{user.name}</span>
-            <span className="truncate text-sm font-normal text-muted-foreground">{user.email}</span>
+          <div className="flex flex-col">
+            <span className="truncate font-semibold">{user.name}</span>
+            <span className="truncate text-[13px] leading-[18px] text-muted-foreground">{user.email}</span>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
