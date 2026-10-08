@@ -20,7 +20,7 @@ export function AgentsView() {
 
   if (data.total === 0 && !filters.search) {
     return (
-      <div className="flex-1 px-4 pb-4 md:px-8">
+      <div className="flex-1 border-t">
         <EmptyState
           icon={BotIcon}
           title="Create your first agent"
@@ -31,7 +31,7 @@ export function AgentsView() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-y-4 px-4 pb-4 md:px-8">
+    <div className="flex flex-1 flex-col">
       <DataTable data={data.items} columns={columns} onRowClick={(row) => router.push(`/agents/${row.id}`)} />
       <DataPagination
         page={filters.page}
@@ -43,7 +43,7 @@ export function AgentsView() {
 }
 
 export function AgentsViewLoading() {
-  return <LoadingState title="Loading agents" description="This may take a few seconds" />;
+  return <LoadingState label="Loading agents" />;
 }
 
 export function AgentsViewError() {

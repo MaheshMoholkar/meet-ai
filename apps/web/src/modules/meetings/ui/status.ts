@@ -9,6 +9,10 @@ import {
 
 import type { MeetingStatus } from "../schemas";
 
+/**
+ * Tinted means the meeting wants something from you; outlined means it is
+ * taking care of itself. Completed is the resting state and stays quiet.
+ */
 export const statusMeta: Record<
   MeetingStatus,
   { label: string; icon: LucideIcon; className: string; spin?: boolean }
@@ -16,27 +20,30 @@ export const statusMeta: Record<
   upcoming: {
     label: "Upcoming",
     icon: ClockArrowUpIcon,
-    className: "bg-yellow-500/20 text-yellow-800 border-yellow-800/5",
+    // Waiting on you.
+    className: "border-transparent bg-you-soft text-foreground [&>svg]:text-you-text",
   },
   active: {
     label: "Active",
+    // Drawn as live voice bars in the badge; the icon is for places that need one.
     icon: RadioIcon,
-    className: "bg-blue-500/20 text-blue-800 border-blue-800/5",
+    // The agent is on the line.
+    className: "border-transparent bg-agent-soft text-agent-text",
   },
   processing: {
     label: "Processing",
     icon: LoaderIcon,
-    className: "bg-gray-300/20 text-gray-800 border-gray-800/5",
+    className: "border-border text-foreground [&>svg]:text-muted-foreground",
     spin: true,
   },
   completed: {
     label: "Completed",
     icon: CircleCheckIcon,
-    className: "bg-emerald-500/20 text-emerald-800 border-emerald-800/5",
+    className: "border-border text-foreground [&>svg]:text-muted-foreground",
   },
   failed: {
     label: "Failed",
     icon: CircleXIcon,
-    className: "bg-rose-500/20 text-rose-800 border-rose-800/5",
+    className: "border-transparent bg-destructive-soft text-destructive",
   },
 };

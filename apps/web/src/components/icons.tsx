@@ -1,5 +1,7 @@
 // Brand marks inlined as SVG, instead of pulling in an icon package for two logos.
 
+import { cn } from "@/lib/utils";
+
 export function GitHubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" {...props}>
@@ -31,17 +33,31 @@ export function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+/**
+ * The Meet AI mark. The square is `agent` and the M is `agent-foreground` on
+ * every ground, Light or Night, so it never takes its colour from the text.
+ */
 export function Logo(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" {...props}>
-      <rect width="32" height="32" rx="9" fill="currentColor" />
+      <rect width="32" height="32" rx="9" fill="var(--agent)" />
       <path
         d="M9 20.5V11.5l7 5 7-5v9"
-        stroke="var(--background, #fff)"
+        stroke="var(--agent-foreground)"
         strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
+  );
+}
+
+/** The mark with the name set beside it in the display face. */
+export function LogoLockup({ className }: { className?: string }) {
+  return (
+    <span className={cn("inline-flex items-center gap-2", className)}>
+      <Logo className="size-7" />
+      <span className="font-heading text-lg leading-[26px] font-semibold tracking-[-0.015em]">Meet AI</span>
+    </span>
   );
 }

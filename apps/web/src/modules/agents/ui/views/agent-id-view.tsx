@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { EntityHeader } from "@/components/entity-header";
 import { GeneratedAvatar } from "@/components/generated-avatar";
+import { PageHeader } from "@/components/page-header";
 import { ErrorState, LoadingState } from "@/components/state-views";
 import { Badge } from "@/components/ui/badge";
 import { useConfirm } from "@/hooks/use-confirm";
@@ -25,7 +26,8 @@ export function AgentIdView({ agentId }: { agentId: string }) {
 
   const [confirmDialog, confirm] = useConfirm(
     "Delete this agent?",
-    `This also deletes its ${data.meetingCount} ${data.meetingCount === 1 ? "meeting" : "meetings"}.`,
+    `This also deletes its ${data.meetingCount} ${data.meetingCount === 1 ? "meeting" : "meetings"}. It can't be undone.`,
+    "Delete agent",
   );
 
   const removeAgent = useMutation(
@@ -50,7 +52,7 @@ export function AgentIdView({ agentId }: { agentId: string }) {
     <>
       {confirmDialog}
       <UpdateAgentDialog open={editOpen} onOpenChange={setEditOpen} initialValues={data} />
-      <div className="flex flex-1 flex-col gap-y-4 px-4 py-4 md:px-8">
+      <div className="flex flex-1 flex-col gap-y-5">
         <EntityHeader
           parentLabel="My agents"
           parentHref="/agents"
@@ -58,29 +60,27 @@ export function AgentIdView({ agentId }: { agentId: string }) {
           onEdit={() => setEditOpen(true)}
           onRemove={onRemove}
         />
-        <div className="rounded-lg border bg-background">
-          <div className="flex flex-col gap-y-5 px-4 py-5">
-            <div className="flex items-center gap-x-3">
-              <GeneratedAvatar variant="botttsNeutral" seed={data.name} className="size-10" />
-              <h2 className="text-2xl font-medium">{data.name}</h2>
-            </div>
-            <Badge variant="outline" className="flex items-center gap-x-2 [&>svg]:size-4">
-              <VideoIcon className="text-blue-700" />
+        <PageHeader
+          title={data.name}
+          leading={<GeneratedAvatar variant="botttsNeutral" seed={data.name} className="size-10" />}
+          meta={
+            <Badge>
+              <VideoIcon />
               {data.meetingCount} {data.meetingCount === 1 ? "meeting" : "meetings"}
             </Badge>
-            <div className="flex flex-col gap-y-4">
-              <p className="text-lg font-medium">Instructions</p>
-              <p className="whitespace-pre-wrap text-neutral-800">{data.instructions}</p>
-            </div>
-          </div>
-        </div>
+          }
+        />
+        <section className="flex flex-col gap-y-2 pt-3">
+          <h2 className="font-heading text-lg leading-[26px] font-semibold tracking-[-0.01em]">Instructions</h2>
+          <p className="max-w-[68ch] text-base leading-[26px] whitespace-pre-wrap">{data.instructions}</p>
+        </section>
       </div>
     </>
   );
 }
 
 export function AgentIdViewLoading() {
-  return <LoadingState title="Loading agent" description="This may take a few seconds" />;
+  return <LoadingState label="Loading agent" variant="page" />;
 }
 
 export function AgentIdViewError() {

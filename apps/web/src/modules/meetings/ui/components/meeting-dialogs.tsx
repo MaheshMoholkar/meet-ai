@@ -16,7 +16,7 @@ export function NewMeetingDialog({ open, onOpenChange }: DialogProps) {
   const router = useRouter();
 
   return (
-    <ResponsiveDialog title="New meeting" description="Create a new meeting" open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog title="New meeting" description="A meeting is a voice call with one of your agents." open={open} onOpenChange={onOpenChange}>
       <MeetingForm
         onSuccess={(id) => {
           onOpenChange(false);
@@ -34,7 +34,7 @@ export function UpdateMeetingDialog({
   initialValues,
 }: DialogProps & { initialValues: MeetingGetOne }) {
   return (
-    <ResponsiveDialog title="Edit meeting" description="Edit the meeting details" open={open} onOpenChange={onOpenChange}>
+    <ResponsiveDialog title="Edit meeting" description="Rename it or choose a different agent." open={open} onOpenChange={onOpenChange}>
       <MeetingForm
         initialValues={initialValues}
         onSuccess={() => onOpenChange(false)}

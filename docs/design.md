@@ -308,7 +308,7 @@ Every data page uses the original app's pattern: server `prefetchQuery` (not awa
 
 ### 12.6 Shared UI
 
-`DataTable`, `DataPagination`, `EmptyState`, `ErrorState`, `LoadingState`, `ResponsiveDialog` (dialog on desktop, drawer on mobile), `CommandSelect`, `GeneratedAvatar` (DiceBear: `botttsNeutral` for agents, `initials` for users), `useConfirm`, dashboard sidebar, navbar, command palette, user button. Small in-house helpers replace dropped packages: `formatDuration`, date formatting with `Intl.DateTimeFormat`, inline GitHub/Google SVG icons.
+`DataTable`, `DataPagination`, `PageHeader`, `EntityHeader`, `EmptyState`, `ErrorState`, `LoadingState`, `ResponsiveDialog` (dialog on desktop, drawer on mobile), `CommandSelect`, `GeneratedAvatar` (DiceBear `botttsNeutral` on agent blue for agents, initials on yellow for users), `VoiceBars`, `Prose`, `useConfirm`, dashboard sidebar (with search), mobile navbar, command palette, user button. The visual rules they follow are in [`ui.md`](ui.md). Small in-house helpers replace dropped packages: `formatDuration`, date formatting with `Intl.DateTimeFormat`, inline GitHub/Google SVG icons.
 
 ### 12.7 Fixes to the original app's quirks
 

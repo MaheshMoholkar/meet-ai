@@ -22,7 +22,7 @@ export function MeetingsView() {
 
   if (data.total === 0 && !hasFilters) {
     return (
-      <div className="flex-1 px-4 pb-4 md:px-8">
+      <div className="flex-1 border-t">
         <EmptyState
           icon={VideoIcon}
           title="Create your first meeting"
@@ -33,7 +33,7 @@ export function MeetingsView() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-y-4 px-4 pb-4 md:px-8">
+    <div className="flex flex-1 flex-col">
       <DataTable data={data.items} columns={columns} onRowClick={(row) => router.push(`/meetings/${row.id}`)} />
       <DataPagination
         page={filters.page}
@@ -45,7 +45,7 @@ export function MeetingsView() {
 }
 
 export function MeetingsViewLoading() {
-  return <LoadingState title="Loading meetings" description="This may take a few seconds" />;
+  return <LoadingState label="Loading meetings" />;
 }
 
 export function MeetingsViewError() {

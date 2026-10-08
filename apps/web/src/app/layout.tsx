@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Radio_Canada, Radio_Canada_Big } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "@/components/ui/sonner";
@@ -8,13 +8,16 @@ import { TRPCReactProvider } from "@/trpc/client";
 
 import "./globals.css";
 
-const geistSans = Geist({
+// Text face. The width axis is what `timecode` narrows for timestamps and lengths.
+const sans = Radio_Canada({
   variable: "--font-sans",
   subsets: ["latin"],
+  axes: ["wdth"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+// Display face: titles only.
+const display = Radio_Canada_Big({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -28,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`${sans.variable} ${display.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <NuqsAdapter>
           <TRPCReactProvider>

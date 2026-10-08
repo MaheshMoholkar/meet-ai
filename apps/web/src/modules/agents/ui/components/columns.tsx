@@ -1,10 +1,9 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { CornerDownRightIcon, VideoIcon } from "lucide-react";
+import Link from "next/link";
 
 import { GeneratedAvatar } from "@/components/generated-avatar";
-import { Badge } from "@/components/ui/badge";
 
 import type { AgentsGetMany } from "../../types";
 
@@ -13,28 +12,36 @@ export const columns: ColumnDef<AgentsGetMany[number]>[] = [
     accessorKey: "name",
     header: "Agent",
     cell: ({ row }) => (
-      <div className="flex flex-col gap-y-1">
-        <div className="flex items-center gap-x-2">
-          <GeneratedAvatar variant="botttsNeutral" seed={row.original.name} className="size-6" />
-          <span className="font-semibold capitalize">{row.original.name}</span>
-        </div>
-        <div className="flex items-center gap-x-1.5">
-          <CornerDownRightIcon className="size-3 text-muted-foreground" />
-          <span className="max-w-50 truncate text-sm text-muted-foreground">
-            {row.original.instructions}
-          </span>
-        </div>
+      <div className="flex min-w-0 items-center gap-3">
+        <GeneratedAvatar variant="botttsNeutral" seed={row.original.name} />
+        {/* The row is clickable; this link is what a keyboard reaches. */}
+        <Link
+          href={`/agents/${row.original.id}`}
+          onClick={(event) => event.stopPropagation()}
+          className="focus-ring block max-w-[45vw] truncate rounded-sm font-semibold sm:max-w-64"
+        >
+          {row.original.name}
+        </Link>
       </div>
+    ),
+  },
+  {
+    accessorKey: "instructions",
+    header: "Instructions",
+    meta: { className: "hidden lg:table-cell" },
+    cell: ({ row }) => (
+      <span className="block max-w-72 truncate text-[13px] leading-[18px] text-muted-foreground xl:max-w-[420px]">
+        {row.original.instructions}
+      </span>
     ),
   },
   {
     accessorKey: "meetingCount",
     header: "Meetings",
     cell: ({ row }) => (
-      <Badge variant="outline" className="flex items-center gap-x-2 [&>svg]:size-4">
-        <VideoIcon className="text-blue-700" />
+      <span className="timecode">
         {row.original.meetingCount} {row.original.meetingCount === 1 ? "meeting" : "meetings"}
-      </Badge>
+      </span>
     ),
   },
 ];

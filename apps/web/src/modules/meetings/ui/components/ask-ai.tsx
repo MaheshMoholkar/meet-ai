@@ -3,14 +3,14 @@
 import { useChat } from "@ai-sdk/react";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { SendIcon } from "lucide-react";
+import { ArrowUpIcon } from "lucide-react";
 import { useState } from "react";
-import Markdown from "react-markdown";
 
 import { GeneratedAvatar } from "@/components/generated-avatar";
+import { Prose } from "@/components/prose";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
+import { VoiceBars } from "@/components/voice-bars";
 import { useTRPC } from "@/trpc/client";
 
 const textOf = (message: UIMessage) =>
@@ -44,33 +44,47 @@ export function AskAi({ meetingId, agentName }: { meetingId: string; agentName: 
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-lg border bg-background">
-      <div className="flex max-h-[calc(100svh-22rem)] min-h-64 flex-col gap-y-4 overflow-y-auto p-4">
+    <div className="flex max-w-[760px] flex-col gap-y-6">
+      <div className="flex max-h-[calc(100svh-28rem)] min-h-64 flex-col gap-y-5 overflow-y-auto">
         {messages.length === 0 && (
-          <p className="m-auto max-w-sm text-center text-sm text-muted-foreground">
+          <p className="m-auto max-w-sm text-center text-[13px] leading-[18px] text-muted-foreground">
             Ask about this meeting: decisions, follow-ups, anything that was said.
           </p>
         )}
-        {messages.map((message) => {
-          const isUser = message.role === "user";
-          return (
-            <div key={message.id} className={cn("flex gap-x-3", isUser && "flex-row-reverse")}>
-              {!isUser && <GeneratedAvatar seed={agentName} variant="botttsNeutral" className="size-7" />}
-              <div
-                className={cn(
-                  "max-w-[80%] rounded-lg px-3 py-2 text-sm",
-                  isUser ? "bg-primary text-primary-foreground" : "bg-muted [&_p]:mb-2 [&_p:last-child]:mb-0",
-                )}
-              >
-                {isUser ? textOf(message) : <Markdown>{textOf(message)}</Markdown>}
+        {messages.map((message) =>
+          message.role === "user" ? (
+            // You: on the right, in your colour.
+            <div key={message.id} className="flex justify-end">
+              <div className="max-w-[80%] rounded-lg rounded-br-sm bg-you-soft px-3 py-2 text-sm whitespace-pre-wrap text-foreground">
+                {textOf(message)}
               </div>
             </div>
-          );
-        })}
-        {status === "submitted" && <p className="text-sm text-muted-foreground">Thinking…</p>}
+          ) : (
+            // The agent: on the left, no bubble, written on the canvas.
+            <div key={message.id} className="flex items-start gap-x-3">
+              <GeneratedAvatar seed={agentName} variant="botttsNeutral" className="size-7" />
+              <div className="min-w-0 pt-0.5">
+                <p className="text-[13px] leading-[18px] font-semibold">{agentName}</p>
+                <Prose size="sm">{textOf(message)}</Prose>
+              </div>
+            </div>
+          ),
+        )}
+        {status === "submitted" && (
+          <div className="flex items-center gap-x-3">
+            <GeneratedAvatar seed={agentName} variant="botttsNeutral" className="size-7" />
+            <p className="flex items-center gap-x-2 text-sm text-muted-foreground">
+              <VoiceBars size="xs" state="thinking" speaker="inherit" levels={[0, 0, 0]} className="text-agent-text" />
+              Thinking…
+            </p>
+          </div>
+        )}
         {error && <p className="text-sm text-destructive">Something went wrong. Please try again.</p>}
       </div>
-      <form onSubmit={submit} className="flex items-end gap-x-2 border-t p-3">
+      <form
+        onSubmit={submit}
+        className="flex items-end gap-x-2 rounded-lg border border-input bg-card py-2 pr-2 pl-3 transition-colors focus-within:border-ring focus-within:outline-2 focus-within:outline-offset-1 focus-within:outline-ring"
+      >
         <Textarea
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
@@ -80,10 +94,10 @@ export function AskAi({ meetingId, agentName }: { meetingId: string; agentName: 
           placeholder="Ask a question about this meeting"
           aria-label="Ask a question about this meeting"
           rows={1}
-          className="min-h-10 resize-none"
+          className="min-h-8 flex-1 resize-none rounded-none border-0 bg-transparent px-0 py-[5px] focus-visible:outline-0"
         />
-        <Button type="submit" size="icon-lg" disabled={busy || !draft.trim()} aria-label="Send">
-          <SendIcon />
+        <Button type="submit" size="icon" disabled={busy || !draft.trim()} aria-label="Send">
+          <ArrowUpIcon />
         </Button>
       </form>
     </div>

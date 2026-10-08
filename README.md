@@ -34,7 +34,7 @@ The whole stack runs on your laptop — including the speech models and the LLM 
 4. LiveKit's **webhooks** move the meeting through `upcoming → active → processing`.
 5. When the call ends, the agent uploads the transcript to **S3** and queues a job on **SQS**; the **summarizer worker** writes the summary back to Postgres.
 
-The editable diagram is [`docs/architecture.excalidraw`](docs/architecture.excalidraw) (open it at [excalidraw.com](https://excalidraw.com)). The full design, with the decisions behind it, is in [`docs/design.md`](docs/design.md).
+The editable diagram is [`docs/architecture.excalidraw`](docs/architecture.excalidraw) (open it at [excalidraw.com](https://excalidraw.com)). The full design, with the decisions behind it, is in [`docs/design.md`](docs/design.md). The visual design (tokens, type, and the rules for colour) is in [`docs/ui.md`](docs/ui.md).
 
 | Piece | On your laptop | On AWS |
 |---|---|---|

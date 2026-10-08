@@ -1,33 +1,34 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { ClockFadingIcon, CornerDownRightIcon } from "lucide-react";
+import Link from "next/link";
 
 import { GeneratedAvatar } from "@/components/generated-avatar";
-import { Badge } from "@/components/ui/badge";
-import { cn, formatDuration, formatShortDate } from "@/lib/utils";
+import { formatDuration, formatShortDate } from "@/lib/utils";
 
 import type { MeetingsGetMany } from "../../types";
-import { statusMeta } from "../status";
+import { StatusBadge } from "./status-badge";
 
 export const columns: ColumnDef<MeetingsGetMany[number]>[] = [
   {
     accessorKey: "name",
     header: "Meeting",
     cell: ({ row }) => (
-      <div className="flex flex-col gap-y-1">
-        <span className="font-semibold capitalize">{row.original.name}</span>
-        <div className="flex items-center gap-x-2">
-          <div className="flex items-center gap-x-1">
-            <CornerDownRightIcon className="size-3 text-muted-foreground" />
-            <span className="max-w-50 truncate text-sm text-muted-foreground capitalize">
-              {row.original.agent.name}
-            </span>
-          </div>
-          <GeneratedAvatar variant="botttsNeutral" seed={row.original.agent.name} className="size-4" />
-          {row.original.startedAt && (
-            <span className="text-sm text-muted-foreground">{formatShortDate(row.original.startedAt)}</span>
-          )}
+      <div className="flex min-w-0 items-center gap-3">
+        <GeneratedAvatar variant="botttsNeutral" seed={row.original.agent.name} />
+        <div className="min-w-0">
+          {/* The row is clickable; this link is what a keyboard reaches. */}
+          <Link
+            href={`/meetings/${row.original.id}`}
+            onClick={(event) => event.stopPropagation()}
+            className="focus-ring block max-w-[38vw] truncate rounded-sm font-semibold sm:max-w-64 md:max-w-40 lg:max-w-96"
+          >
+            {row.original.name}
+          </Link>
+          <span className="block max-w-[38vw] truncate text-[13px] leading-[18px] text-muted-foreground sm:max-w-64 md:max-w-40 lg:max-w-96">
+            with {row.original.agent.name}
+            {row.original.startedAt && `, ${formatShortDate(row.original.startedAt)}`}
+          </span>
         </div>
       </div>
     ),
@@ -35,24 +36,18 @@ export const columns: ColumnDef<MeetingsGetMany[number]>[] = [
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => {
-      const { label, icon: Icon, className, spin } = statusMeta[row.original.status];
-      return (
-        <Badge variant="outline" className={cn("[&>svg]:size-4", className)}>
-          <Icon className={cn(spin && "animate-spin")} />
-          {label}
-        </Badge>
-      );
-    },
+    cell: ({ row }) => <StatusBadge status={row.original.status} />,
   },
   {
     accessorKey: "duration",
     header: "Duration",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="flex items-center gap-x-2 [&>svg]:size-4">
-        <ClockFadingIcon className="text-blue-700" />
-        {row.original.duration ? formatDuration(row.original.duration) : "No duration"}
-      </Badge>
-    ),
+    // The duration is on the meeting's page; phones keep the name and the status.
+    meta: { className: "hidden sm:table-cell" },
+    cell: ({ row }) =>
+      row.original.duration ? (
+        <span className="timecode">{formatDuration(row.original.duration)}</span>
+      ) : (
+        <span className="timecode text-muted-foreground">No duration</span>
+      ),
   },
 ];

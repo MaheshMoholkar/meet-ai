@@ -54,13 +54,13 @@ export function CommandSelect({
         aria-invalid={ariaInvalid}
         onClick={() => handleOpenChange(true)}
         className={cn(
-          "h-9 justify-between px-2 font-normal",
+          "justify-between gap-2 pr-2 pl-3 font-normal",
           !selected && "text-muted-foreground",
           className,
         )}
       >
         <div className="truncate">{selected?.children ?? placeholder}</div>
-        <ChevronsUpDownIcon />
+        <ChevronsUpDownIcon className="text-muted-foreground" />
       </Button>
       <CommandResponsiveDialog
         open={open}

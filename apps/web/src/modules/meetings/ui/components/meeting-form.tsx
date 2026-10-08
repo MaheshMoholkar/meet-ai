@@ -89,6 +89,7 @@ export function MeetingForm({ initialValues, onSuccess, onCancel }: Props) {
                   id="meeting-name"
                   placeholder="e.g. Algebra practice"
                   aria-invalid={fieldState.invalid}
+                  className="h-10"
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
@@ -102,6 +103,7 @@ export function MeetingForm({ initialValues, onSuccess, onCancel }: Props) {
                 <FieldLabel htmlFor="meeting-agent">Agent</FieldLabel>
                 <AgentSelect
                   id="meeting-agent"
+                  className="h-10 w-full"
                   value={field.value}
                   onSelect={field.onChange}
                   aria-invalid={fieldState.invalid}
@@ -110,7 +112,7 @@ export function MeetingForm({ initialValues, onSuccess, onCancel }: Props) {
                   Not finding the right one?{" "}
                   <button
                     type="button"
-                    className="text-primary underline-offset-4 hover:underline"
+                    className="focus-ring rounded-sm text-agent-text underline underline-offset-4"
                     onClick={() => setNewAgentOpen(true)}
                   >
                     Create a new agent

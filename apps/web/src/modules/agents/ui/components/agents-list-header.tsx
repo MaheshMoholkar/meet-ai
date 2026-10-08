@@ -1,8 +1,9 @@
 "use client";
 
-import { PlusIcon, XCircleIcon } from "lucide-react";
+import { PlusIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 
+import { PageHeader } from "@/components/page-header";
 import { SearchFilter } from "@/components/search-filter";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
@@ -18,15 +19,18 @@ export function AgentsListHeader() {
   return (
     <>
       <NewAgentDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-      <div className="flex flex-col gap-y-4 px-4 py-4 md:px-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-medium">My agents</h1>
-          <Button onClick={() => setDialogOpen(true)}>
-            <PlusIcon />
-            New agent
-          </Button>
-        </div>
+      <div className="flex flex-col gap-y-6 pb-5">
+        <PageHeader
+          title="My agents"
+          action={
+            <Button onClick={() => setDialogOpen(true)}>
+              <PlusIcon />
+              New agent
+            </Button>
+          }
+        />
         <ScrollArea>
+          {/* The padding keeps focus outlines from being clipped by the scroll area. */}
           <div className="flex items-center gap-x-2 p-1">
             <SearchFilter
               value={filters.search}
@@ -34,8 +38,8 @@ export function AgentsListHeader() {
               placeholder="Filter by name"
             />
             {filters.search && (
-              <Button variant="outline" size="sm" onClick={() => setFilters({ search: "", page: DEFAULT_PAGE })}>
-                <XCircleIcon />
+              <Button variant="ghost" onClick={() => setFilters({ search: "", page: DEFAULT_PAGE })}>
+                <XIcon />
                 Clear
               </Button>
             )}

@@ -33,7 +33,7 @@ export function AgentSelect({ placeholder = "Select an agent", ...props }: Props
         value: agent.id,
         label: agent.name,
         children: (
-          <div className="flex items-center gap-x-2">
+          <div className="flex min-w-0 items-center gap-x-2">
             <GeneratedAvatar seed={agent.name} variant="botttsNeutral" className="size-5" />
             <span className="truncate">{agent.name}</span>
           </div>
